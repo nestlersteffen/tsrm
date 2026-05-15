@@ -1,0 +1,104 @@
+
+#' Fit a Social Relations Model to Round-Robin Data
+#'
+#' @param formula A formula for the fixed effects
+#' @param g_var A vector with an identifier for round-robin groups
+#' @param p_var A vector with identifiers for actor and partner
+#' @param d_var An optional argument with an identifier for the dyad
+#' @param data A data frame
+#' @param args_list A list of control arguments
+#' @param debug A control args for debugging, for internal use only
+#' @export
+
+srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,  
+	data = NULL, args_list = srm_control(), debug = FALSE )
+{
+
+	mm <- match.call()
+	
+	#--- step 0: make args_list:
+	missCtrl <- missing( args_list )
+	if ( !missCtrl && !inherits( args_list, "srm_control" ) ) {
+  		if(!is.list(args_list)) { stop("'args_list' has to be a list.") }
+  		args_list <- do.call( srm_control, args_list )
+ 	}
+ 	
+	#--- step 1: get formulas and variables names
+	mm_formula <- mm[["formula"]]
+	if (is.null(mm_formula)) {
+  		stop("formula parameter is missing.")
+	}
+
+	if (!any(grepl("$", mm_formula, fixed=TRUE))) {
+  		formula <- eval(mm_formula, data, enclos=sys.frame(sys.parent()))
+	} else {
+  		formula <- eval(mm_formula, envir = parent.frame())
+	}
+
+	if (inherits(formula, "formula")) {
+  		# univariate case - make a list
+  		formulas <- list(formula)
+	} else if (is.list(formula)) {
+  		# bi-and multivariate case - formula is a list
+  		formulas <- formula
+	} else {
+  		stop("formula must be a formula or a list of formulas.")
+	}
+
+	names_y <- c()
+	names_X <- list()
+
+	for (i in seq_along(formulas)) {
+  		if (!inherits(formulas[[i]], "formula")) {
+    		stop(paste("i", "th formula is not valid."))
+  		}
+  		names_y[i]   <- all.vars(formulas[[i]])[1]
+  		names_X[[i]] <- attr(stats::terms(formulas[[i]]), "term.labels")
+	}
+
+  	#--- step 2 and 3: make srm_data_frame 
+  	tmp <- srm_make_dataframe( names_y = names_y, names_X = names_X, p_var = p_var,
+   	 	d_var = d_var, g_var = g_var, formulas = formulas, data = data )
+  	srm_data   <- tmp$srm_data
+  	names_list <- tmp$names_list
+
+  	#--- step 3: make data_list
+	data_list <- srm_make_datalist( srm_data = srm_data, names_list = names_list, 
+	 	args_list = args_list ) 
+
+	#--- step 4: make parm_table:
+	parm_table <- srm_make_parmtable( data_list = data_list, names_list = names_list, 
+	 	args_list = args_list )
+
+	#--- step 5: make parm_table:
+	parm_list  <- srm_make_parmlist( parm_table = parm_table, names_list = names_list, 
+	  	args_list = args_list )
+
+	#--- step 6: add start values ( optional )
+	parm_table <- srm_add_starts( parm_table = parm_table, data_list = data_list, 
+	 	args_list = args_list )
+
+	if ( debug ) {
+		result <- list( parm_table = parm_table, parm_list = parm_list, data_list = data_list, 
+			args_list = args_list, names_list = names_list, srm_data = srm_data )
+		return( result )
+	}
+
+	#--- step 7: fit the model
+	result <- srm_fit( parm_table = parm_table, parm_list = parm_list, data_list = data_list,
+	 	args_list = args_list ) 
+
+	#- some warnings: 
+  	if ( !result$converged ) {
+  	   warning("The algorithm did not converge.")
+  	}
+  	if ( result$warning_vcov ) {
+  	   warning("Hessian is not invertible. The covariance matrix of the 
+  	   	estimates could not be computed.")
+  	}
+  
+	#- finally...
+	result <- c( result, list( names_list = names_list, names_y = names_y ) ) 
+	class( result ) <- "tsrm"
+  	return( result )
+}

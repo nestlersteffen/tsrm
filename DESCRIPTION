@@ -1,0 +1,19 @@
+Package: tsrm
+Type: Package
+Title: Estimation of Triadic and Dyadic Social Relations Model Parameters
+Version: 0.01
+Date: 2026-05-11
+Author: Steffen Nestler 
+Maintainer: Steffen Nestler <steffen.nestler@uni-muenster.de>
+Description: 
+    Provides functionality for maximum likelihood, restrictced maximum likelihood and Bayesian estimation of Social Relations Model Parameters for Triadic and Dyadic Data.
+Depends:
+    R (>= 4.5)
+Imports: 
+    TMB, Rcpp, RcppEigen, stats, utils, mvtnorm, numDeriv, nloptr
+LinkingTo:
+    TMB, Rcpp, RcppEigen
+License: GPL (>= 2)
+Encoding: UTF-8
+Config/roxygen2/version: 8.0.0
+LazyData: true
