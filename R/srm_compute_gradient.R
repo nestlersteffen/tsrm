@@ -111,7 +111,7 @@ srm_compute_gradient <- function( parm = NULL, parm_list = NULL, parm_table = NU
 
 	#- get no. groups:
 	ngroups  <- nrow( groupinfo )
-	gradient <- matrix( 0, nrow = ngroups, ncol = nrow( parm_table$index) ) 
+	gradient <- matrix( 0, nrow = ngroups, ncol = max( parm_table$index) ) 
 	llfct    <- rep( 0, ngroups )
 
 	#- let's go:
@@ -140,10 +140,8 @@ srm_compute_gradient <- function( parm = NULL, parm_list = NULL, parm_table = NU
 		if ( args_list$use_rcpp && !args_list$large ) {
 
 			#- get position matrix and type in case of rcpp:
-			posmat  <- as.matrix( parm_table_ng[,c("pos1","pos2")] )
-			typevec <- as.vector( parm_table_ng[,c("ntype")] )
-			storage.mode( typevec ) <- "integer"
-			storage.mode( posmat )  <- "integer" 
+			parm_mat  <- as.matrix( parm_table_ng[,c("pos1","pos2","ntype","index")] )
+			storage.mode( parm_mat ) <- "integer"
 			
 			#- compute ...
 			tmp_grad <- srm_gradient_singlegroup_export( parm_list=parm_list, 
@@ -151,7 +149,7 @@ srm_compute_gradient <- function( parm = NULL, parm_list = NULL, parm_table = NU
 				tZg=as.matrix(Zg[idx1:idx2,]), 
 				tZp=Zp[idx1:idx2,], tZd=Zd[idx1:idx2,], 
 				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, 
-				BETA=as.vector(BETA_ng), np=np, nd=nd, typevec=typevec, posmat=posmat, 
+				BETA=as.vector(BETA_ng), np=np, nd=nd, parm_mat=parm_mat, 
 				with_reml=args_list$with_reml, random_group=args_list$random_group )
 
 		} else if ( args_list$use_rcpp && args_list$large ) {
@@ -163,10 +161,8 @@ srm_compute_gradient <- function( parm = NULL, parm_list = NULL, parm_table = NU
 			SIGMA_D <- as(SIGMA_D, "dgCMatrix")
 
 			#- get position matrix and type in case of rcpp:
-			posmat  <- as.matrix( parm_table_ng[,c("pos1","pos2")] )
-			typevec <- as.vector( parm_table_ng[,c("ntype")] )
-			storage.mode( typevec ) <- "integer"
-			storage.mode( posmat )  <- "integer" 
+			parm_mat  <- as.matrix( parm_table_ng[,c("pos1","pos2","ntype","index")] )
+			storage.mode( parm_mat ) <- "integer"
 			
 			#- compute ...
 			tmp_grad <- srm_gradient_singlegroup_sparse_export( parm_list=parm_list, 
@@ -174,16 +170,18 @@ srm_compute_gradient <- function( parm = NULL, parm_list = NULL, parm_table = NU
 				tZg=as.matrix(Zg[idx1:idx2,]), 
 				tZp=tZp, tZd=tZd, 
 				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, 
-				BETA=as.vector(BETA_ng), np=np, nd=nd, typevec=typevec, posmat=posmat, 
+				BETA=as.vector(BETA_ng), np=np, nd=nd, parm_mat=parm_mat,
 				with_reml=args_list$with_reml, random_group=args_list$random_group )
 
 		} else {
+		
 			#- compute ...
 			tmp_grad <- srm_compute_gradient_singlegroup( parm_list=parm_list, 
 				parm_table=parm_table_ng, np=np, nd=nd, y=y[idx1:idx2], X=X[idx1:idx2,], 
 				Zg=Zg[idx1:idx2,], Zp=Zp[idx1:idx2,], Zd=Zd[idx1:idx2,], BETA=BETA_ng, 
 				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, 
 				random_group=args_list$random_group, with_reml=args_list$with_reml )
+		
 		}
 		
 		llfct[ng]     <- tmp_grad[ 1]

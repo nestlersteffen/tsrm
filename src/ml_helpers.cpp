@@ -60,8 +60,7 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& SIGMA_D,
     const Eigen::VectorXd& BETA,
     int np, int nd,
-    const Eigen::VectorXi& typevec,
-    const Eigen::MatrixXi& posmat,
+    const Eigen::MatrixXi& parm_mat,
     bool with_reml, bool random_group ) 
 {
     
@@ -96,14 +95,15 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
     Eigen::VectorXd dBETA = tei.transpose() * tX;
     
     // -- Step 7: iterate across posmat entries for the gradient:
-    int no_parm = posmat.rows();
-    Eigen::VectorXd ng_grad = Eigen::VectorXd::Zero( no_parm + 1 ); 
-
-    for(int nn = 0; nn < no_parm; nn++) {
+    int NOP = parm_mat.rows();
+    int NP  = parm_mat.col(3).maxCoeff();
+    Eigen::VectorXd ng_grad = Eigen::VectorXd::Zero( NP + 1 ); 
+    for(int nn = 0; nn < NOP; nn++) {
 
         // get type of parameter:
-        int type = typevec(nn);
-        Eigen::VectorXi pos = posmat.row(nn);
+        int type = parm_mat(nn,2);
+        int index = parm_mat(nn,3);
+        Eigen::VectorXi pos = parm_mat.row(nn).segment<2>(0);
 
         // make a placeholder:
         double res = 0;
@@ -151,7 +151,7 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
 
         }
 
-        ng_grad( nn + 1 ) = res;
+        ng_grad( index ) = res;
 
     }
 
@@ -179,8 +179,7 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
     const Eigen::SparseMatrix<double>& SIGMA_D,
     const Eigen::VectorXd& BETA,
     int np, int nd,
-    const Eigen::VectorXi& typevec,
-    const Eigen::MatrixXi& posmat,
+    const Eigen::MatrixXi& parm_mat,
     bool with_reml, bool random_group ) 
 {
     
@@ -215,14 +214,15 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
     Eigen::VectorXd dBETA = tei.transpose() * tX;
     
     // -- Step 7: iterate across posmat entries for the gradient:
-    int no_parm = posmat.rows();
-    Eigen::VectorXd ng_grad = Eigen::VectorXd::Zero( no_parm + 1 ); 
-
-    for(int nn = 0; nn < no_parm; nn++) {
+    int NOP = parm_mat.rows();
+    int NP  = parm_mat.col(3).maxCoeff();
+    Eigen::VectorXd ng_grad = Eigen::VectorXd::Zero( NP + 1 ); 
+    for(int nn = 0; nn < NOP; nn++) {
 
         // get type of parameter:
-        int type = typevec(nn);
-        Eigen::VectorXi pos = posmat.row(nn);
+        int type = parm_mat(nn,2);
+        int index = parm_mat(nn,3);
+        Eigen::VectorXi pos = parm_mat.row(nn).segment<2>(0);
 
         // make a placeholder:
         double res = 0;
@@ -272,7 +272,7 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
             
         }
 
-        ng_grad( nn + 1 ) = res;
+        ng_grad( index ) = res;
 
     }
 

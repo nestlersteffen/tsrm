@@ -9,11 +9,11 @@ srm_compute_V_sparse_export <- function(tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D
     .Call(`_tsrm_srm_compute_V_sparse_export`, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, random_group)
 }
 
-srm_gradient_singlegroup_export <- function(parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, typevec, posmat, with_reml = FALSE, random_group = FALSE) {
-    .Call(`_tsrm_srm_gradient_singlegroup_export`, parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, typevec, posmat, with_reml, random_group)
+srm_gradient_singlegroup_export <- function(parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, parm_mat, with_reml = FALSE, random_group = FALSE) {
+    .Call(`_tsrm_srm_gradient_singlegroup_export`, parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, parm_mat, with_reml, random_group)
 }
 
-srm_gradient_singlegroup_sparse_export <- function(parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, typevec, posmat, with_reml = FALSE, random_group = FALSE) {
-    .Call(`_tsrm_srm_gradient_singlegroup_sparse_export`, parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, typevec, posmat, with_reml, random_group)
+srm_gradient_singlegroup_sparse_export <- function(parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, parm_mat, with_reml = FALSE, random_group = FALSE) {
+    .Call(`_tsrm_srm_gradient_singlegroup_sparse_export`, parm_list, ty, tX, tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, BETA, np, nd, parm_mat, with_reml, random_group)
 }
 

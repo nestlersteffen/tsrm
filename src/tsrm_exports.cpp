@@ -45,8 +45,7 @@ Eigen::VectorXd srm_gradient_singlegroup_export(
     const Eigen::MatrixXd& SIGMA_D,
     const Eigen::VectorXd& BETA,
     int np, int nd,
-    const Eigen::VectorXi& typevec,
-    const Eigen::MatrixXi& posmat,
+    const Eigen::MatrixXi& parm_mat,
     bool with_reml = false, bool random_group = false )
 {
     //-- get the parm_list matrices:
@@ -62,7 +61,7 @@ Eigen::VectorXd srm_gradient_singlegroup_export(
         SD_G, SD_P, SD_D, RHO_G, RHO_P, RHO_D, 
         ty, tX, tZg, tZp, tZd, 
         SIGMA_G, SIGMA_P, SIGMA_D, BETA, 
-        np, nd, typevec, posmat, with_reml, random_group );
+        np, nd, parm_mat, with_reml, random_group );
 }
 
 // [[Rcpp::export]]
@@ -78,8 +77,7 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_export(
     const Eigen::SparseMatrix<double>& SIGMA_D,
     const Eigen::VectorXd& BETA,
     int np, int nd,
-    const Eigen::VectorXi& typevec,
-    const Eigen::MatrixXi& posmat,
+    const Eigen::MatrixXi& parm_mat,
     bool with_reml = false, bool random_group = false )
 {
     //-- get the parm_list matrices:
@@ -95,5 +93,5 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_export(
         SD_G, SD_P, SD_D, RHO_G, RHO_P, RHO_D, 
         ty, tX, tZg, tZp, tZd, 
         SIGMA_G, SIGMA_P, SIGMA_D, BETA, 
-        np, nd, typevec, posmat, with_reml, random_group );
+        np, nd, parm_mat, with_reml, random_group );
 }

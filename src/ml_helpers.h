@@ -47,8 +47,7 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& SIGMA_D,
     const Eigen::VectorXd& BETA,
     int np, int nd,
-    const Eigen::VectorXi& typevec,
-    const Eigen::MatrixXi& posmat,
+    const Eigen::MatrixXi& parm_mat,
     bool with_reml = false, bool random_group = false );
 
 Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
@@ -68,6 +67,5 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
     const Eigen::SparseMatrix<double>& SIGMA_D,
     const Eigen::VectorXd& BETA,
     int np, int nd,
-    const Eigen::VectorXi& typevec,
-    const Eigen::MatrixXi& posmat,
+    const Eigen::MatrixXi& parm_mat,
     bool with_reml = false, bool random_group = false );
