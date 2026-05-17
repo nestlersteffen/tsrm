@@ -1,18 +1,13 @@
 
 srm_control <- function( 
   	use_rcpp = TRUE, # use rcpp?
-	verbose = TRUE,
 	with_reml = TRUE,
 	random_group = FALSE,
 	fixed_group = FALSE,
 	large = FALSE,
-	type_ses = "Satterthwaite",
+	type_ses = "Standard",
 	method = "c++",
-	fs_out_maxit = 10,
-	fs_out_convcrit = 10e-4,
-	fs_inn_maxit = 50,
-	fs_inn_convcrit = 10e-6,
-	verbose_inn = FALSE,
+	verbose = FALSE,
 	gr_maxit = 1000L,
 	gr_abs_tol = (.Machine$double.eps*10),
 	gr_rel_tol = 1e-9,
@@ -26,7 +21,7 @@ srm_control <- function(
 	... ) 
 {
   
-	nlminb_ctrl <- fs_ctrl <- NULL
+	nlminb_ctrl <- NULL
 
 	if ( !( method %in% c("c++","tmb") ) ) {
 		stop("Undefined method defined.")

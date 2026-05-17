@@ -131,9 +131,10 @@ srm_compute_gradient <- function( parm = NULL, parm_list = NULL, parm_table = NU
 				idx <- ng 
 			}
 			BETA_ng <- as.matrix( BETA[idx,1] )
-			parm_table_ng <- parm_table[ (parm_table$type == "BETA" & parm_table$pos1 %in% idx) | 
-				parm_table$type != "BETA", ]
-			parm_table_ng[ parm_table_ng$type == "BETA", ]$pos1 <- seq( 1, nrow( BETA_ng ), 1 )
+			if ( length( which( parm_table_ng$type == "BETA" ) ) > 0 ) {
+				parm_table_ng <- parm_table[ ( parm_table$type == "BETA" & parm_table$pos1 %in% idx ) | parm_table$type != "BETA", ]
+				parm_table_ng[ parm_table_ng$type == "BETA", ]$pos1 <- seq( 1, nrow( BETA_ng ), 1 )
+			}	
 		}
 
 		#- compute all relevant values

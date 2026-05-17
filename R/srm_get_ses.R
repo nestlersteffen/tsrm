@@ -73,18 +73,16 @@ srm_get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL,
 
 	#- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	#-  compute standard errors for variance and covariance parms
-	tmp_args_list <- args_list
-	tmp_args_list$fixed_group <- FALSE
 	hessian_covs <- nloptr::nl.jacobian( x0=parm[-idx], fn=srm_compute_gradient, 
 	    parm_list=parm_list, parm_table=parm_table_covs, data_list=data_list, 
-		args_list=tmp_args_list, both=FALSE )
+		args_list=args_list, both=FALSE )
 	vcov_covs <- base::solve( hessian_covs ) 
 	ses_covs  <- suppressWarnings( sqrt( diag( vcov_covs ) ) )
 
-	parm_table_covs$est  <- parm[-idx]
-	parm_table_covs$se   <- ses_covs
-	parm_table_covs$tval <- with( parm_table_covs, est/se )   
-	parm_table_covs$p    <- 2 * pnorm( -abs( parm_table_covs$tval ) )
+	parm_table_covs$est <- parm[-idx]
+	parm_table_covs$se  <- ses_covs
+	parm_table_covs$z   <- with( parm_table_covs, est/se )   
+	parm_table_covs$p   <- 2 * pnorm( -abs( parm_table_covs$z ) )
 
 	#- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	#-  now we compute the standard errors for the fixed effects
@@ -132,9 +130,9 @@ srm_get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL,
 	A  <- result[,,1]
 	vcov_beta <- base::solve( A )
 	ses_beta  <- sqrt( diag( vcov_beta ) )
-	parm_table_beta$est  <- parm[idx]
-	parm_table_beta$se   <- ses_beta
-	parm_table_beta$tval <- with( parm_table_beta, est/se )
+	parm_table_beta$est <- parm[idx]
+	parm_table_beta$se  <- ses_beta
+	parm_table_beta$z   <- with( parm_table_beta, est/se )
 	
 	#- for the p-value we use the standard test or the Sattertwhaite approximation
 	if ( args_list$type_ses == "Satterthwaite" ) {
@@ -152,10 +150,10 @@ srm_get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL,
 	      	dfs[pp] <- (2*(t(cvec)%*%vcov_beta%*%cvec)^2)/(t(gr)%*%vcov_covs%*%gr)
 	   } 
 	   parm_table_beta$dfs <- dfs
-	   parm_table_beta$p   <- 2*pt(-abs( parm_table_beta$tval), df=abs(dfs) )
+	   parm_table_beta$p   <- 2*pt(-abs( parm_table_beta$z), df=abs(dfs) )
 	   parm_table_covs$dfs <- rep( 1, nrow( parm_table_covs) )
 	} else if ( args_list$type_ses == "Standard" ) { 
-		parm_table_beta$p  <- 2 * pnorm( -abs( parm_table_beta$tval ) )  
+		parm_table_beta$p  <- 2 * pnorm( -abs( parm_table_beta$z ) )  
 	}
 
 	#- combine tables and add final information:
