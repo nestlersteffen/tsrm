@@ -6,21 +6,21 @@
 #' @param p_var A vector with identifiers for actor and partner
 #' @param d_var An optional argument with an identifier for the dyad
 #' @param data A data frame
-#' @param args_list A list of control arguments
+#' @param control A list of control arguments
 #' @param debug A control args for debugging, for internal use only
 #' @export
 
 srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,  
-	data = NULL, args_list = srm_control(), debug = FALSE )
+	data = NULL, control = srm_control(), debug = FALSE )
 {
 
 	mm <- match.call()
 	
 	#--- step 0: make args_list:
-	missCtrl <- missing( args_list )
-	if ( !missCtrl && !inherits( args_list, "srm_control" ) ) {
-  		if(!is.list(args_list)) { stop("'args_list' has to be a list.") }
-  		args_list <- do.call( srm_control, args_list )
+	missCtrl <- missing( control )
+	if ( !missCtrl && !inherits( control, "srm_control" ) ) {
+  		if(!is.list(control)) { stop("'control' has to be a list.") }
+  		args_list <- do.call( srm_control, control )
  	}
  	
 	#--- step 1: get formulas and variables names

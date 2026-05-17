@@ -10,7 +10,7 @@ srm(
   p_var = NULL,
   d_var = NULL,
   data = NULL,
-  args_list = srm_control(),
+  control = srm_control(),
   debug = FALSE
 )
 }
@@ -25,7 +25,7 @@ srm(
 
 \item{data}{A data frame}
 
-\item{args_list}{A list of control arguments}
+\item{control}{A list of control arguments}
 
 \item{debug}{A control args for debugging, for internal use only}
 }
