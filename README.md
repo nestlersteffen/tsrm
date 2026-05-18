@@ -14,8 +14,7 @@ To update, simply rerun the installation command.
 ## Contributing
 
 Issues and pull requests are not actively monitored. For questions, 
-suggestions, or bug reports, please contact me directly at 
-steffen.nestler@uni-muenster.de.
+suggestions, or bug reports, please contact me directly via mail.
 
 ## Status
 
