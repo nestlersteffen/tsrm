@@ -9,6 +9,14 @@ Maximum Likelihood and Bayesian Estimation of the Parameters of the Triadic and 
 devtools::install_github("nestlersteffen/tsrm")
 ```
 
+To update, simply rerun the installation command.
+
+## Contributing
+
+Issues and pull requests are not actively monitored. For questions, 
+suggestions, or bug reports, please contact me directly at 
+steffen.nestler@uni-muenster.de.
+
 ## Status
 
 Work in progress.

@@ -1,7 +1,7 @@
 Package: tsrm
 Type: Package
 Title: Estimation of Triadic and Dyadic Social Relations Model Parameters
-Version: 0.01
+Version: 0.0.1
 Date: 2026-05-11
 Author: Steffen Nestler 
 Maintainer: Steffen Nestler <steffen.nestler@uni-muenster.de>
