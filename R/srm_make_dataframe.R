@@ -35,21 +35,13 @@ srm_make_dataframe <- function( names_y = NULL, names_X = NULL, p_var = NULL,
 	#- are there any predictors?
 	mu_preds <- list()
 	for ( i in seq_along( formulas ) ) {
-		tmpX 	 <- model.matrix( formulas[[i]], data )
+		tmpX 	 <- model.matrix.lm( formulas[[i]], data, na.action = "na.pass" )
 		tmpX 	 <- as.data.frame( tmpX )
-		srm_data <- cbind( srm_data, tmpX )
-		# if ( length( names_X ) == 0 ) {
-		# 	mu_preds[[i]] <- "(Intercept)"
-		# 	if ( !( "(Intercept)" %in% colnames( srm_data) ) ) {
-		# 		srm_data <- cbind( srm_data, tmpX )
-		# 	}	
-		# } else {
-		# 	if ( any( names(tmpX) == "(Intercept)" & !( "(Intercept)" %in% colnames( srm_data ) ) ) ) {
-		# 		srm_data <- cbind( srm_data, tmpX[,c("(Intercept)")] )
-		# 		colnames( srm_data )[ncol(srm_data)] <- "(Intercept)"
-		# 	} 
-			mu_preds[[i]] <- names( tmpX )
-		#}
+		mu_preds[[i]] <- names( tmpX )
+		new_cols <- setdiff( names(tmpX), colnames(srm_data) )
+	    if ( length(new_cols) > 0 ) {
+	        srm_data <- cbind( srm_data, tmpX[, new_cols, drop=FALSE] )
+	    }
 	}
 	
 	#- add a dyad-level identifier?
@@ -68,10 +60,16 @@ srm_make_dataframe <- function( names_y = NULL, names_X = NULL, p_var = NULL,
 	if ( no_var > 1 ) {
 		
 		for ( i in 1:no_var ) {
-
-			tmp_data <- srm_data[,c( g_var,p_var,d_var, d_var_type, unique( do.call("c",mu_preds) ), names_y[i] )]
+			
+			tmp_data <- srm_data[,c( g_var,p_var,d_var, d_var_type, 
+								     mu_preds[[i]], 
+				                     names_y[i] )]
 			colnames( tmp_data )[ ncol( tmp_data ) ] <- "y"
 			tmp_data$measure <- i
+			
+			#- delete missings for relevant variables:
+    		pred_cols <- mu_preds[[i]]  # inkl. "(Intercept)"
+			tmp_data  <- tmp_data[ complete.cases( tmp_data[, c(pred_cols, "y")] ), ]
 			final_data_frame <- rbind( final_data_frame, tmp_data )
 		
 		}
@@ -79,8 +77,8 @@ srm_make_dataframe <- function( names_y = NULL, names_X = NULL, p_var = NULL,
 		names_y <- "y"
 
 	} else {
-	
-		final_data_frame <- srm_data
+		pred_cols        <- mu_preds[[1]]
+		final_data_frame <- srm_data[ complete.cases( srm_data[, c(pred_cols, names_y)] ), ]
 		final_data_frame$measure <- 1		
 	
 	}

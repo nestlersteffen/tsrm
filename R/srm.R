@@ -21,6 +21,8 @@ srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,
 	if ( !missCtrl && !inherits( control, "srm_control" ) ) {
   		if(!is.list(control)) { stop("'control' has to be a list.") }
   		args_list <- do.call( srm_control, control )
+ 	} else {
+ 		args_list <- control
  	}
  	
 	#--- step 1: get formulas and variables names
