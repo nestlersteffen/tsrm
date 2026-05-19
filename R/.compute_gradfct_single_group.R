@@ -12,10 +12,10 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
     V <- Zp %*% SIGMA_P %*% t(Zp) +
          Zd %*% SIGMA_D %*% t(Zd)
 
-    if ( !is.null(Zt) ) {
+    if ( ncol(Zt) > 0 ) {
         V <- V + Zt %*% SIGMA_T %*% t(Zt)
     }
-    if ( random_group && !is.null(Zg) ) {
+    if ( ncol(Zg) > 0 ) {
         V <- V + Zg %*% SIGMA_G %*% t(Zg)
     }
 
