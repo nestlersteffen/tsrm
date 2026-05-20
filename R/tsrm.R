@@ -64,7 +64,7 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
   	names_list  <- tmp$names_list
 
   	#--- step 3: make data_list
-	data_list <- make_datalist( srm_data=srm_data, names_list=names_list, 
+	data_list <- make_datalist( data=tsrm_data, names_list=names_list, 
 	 	args_list=args_list, model="tsrm" ) 
   	
   	#--- make parm_table:

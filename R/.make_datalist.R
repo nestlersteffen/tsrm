@@ -1,7 +1,7 @@
 
 #- this function creates a list that contains the design matrices and a matrix with group infos 
 
-make_datalist <- function( our_data=NULL, names_list=NULL, args_list=NULL, model=c("srm","tsrm") ) 
+make_datalist <- function( data=NULL, names_list=NULL, args_list=NULL, model=c("srm","tsrm") ) 
 {
 
 	#- Step 1: get model
@@ -15,12 +15,13 @@ make_datalist <- function( our_data=NULL, names_list=NULL, args_list=NULL, model
     )
 
 	#- step 1: we first generate a list with group specific design matrices:
-  	data_list_groups <- make_datalist_groups( our_data=our_data, names_list=names_list, 
+  	data_list_groups <- make_datalist_groups( data=data, names_list=names_list, 
   		args_list=args_list ) 
 
   	#- step 2: now we combine the matrices - for version 1, ignore this step!
   	data_list <- make_datalist_combine( data_list_groups=data_list_groups, 
   		no_var=names_list$no_var, model=model )
+  	
   	return( data_list )
 
 }

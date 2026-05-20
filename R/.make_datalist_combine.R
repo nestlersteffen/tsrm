@@ -39,6 +39,8 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	 		tmp_list[[ng]][["Zd"]] <- Zd
 	 		tmp_list[[ng]][["Zt"]] <- Zt
 
+		}
+
 	}
 
 	#- combine all matrices into big ones:
@@ -54,7 +56,7 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	nv <- no_var
 
 	#- output:
-	data_list <- list( y=y, X=X, Zp=Zp, Zd=Zd, Zt=Zt, groupinfo=groupinfo, 
+	data_list <- list( y=y, X=X, Zg=Zg, Zp=Zp, Zd=Zd, Zt=Zt, groupinfo=groupinfo, 
 		np=np, nd=nd, nt=nt, nv=nv )
 	return( data_list )
 

@@ -1,7 +1,7 @@
 
 #---- this function generates the design matrices per group:
 
-tsrm_make_datalist_groups <- function( tsrm_data=NULL, names_list=NULL ) 
+tsrm_make_datalist_groups <- function( data=NULL, names_list=NULL, args_list=NULL ) 
 {
 
 	#- get names:
@@ -13,7 +13,7 @@ tsrm_make_datalist_groups <- function( tsrm_data=NULL, names_list=NULL )
 	mu_preds <- names_list[["mu_preds"]] 
 
 	#- rr-group information:
-	groups    <- unique( tsrm_data[,g_var] )
+	groups    <- unique( data[,g_var] )
 	ngroups   <- base::length( groups)
 	tmp_list  <- vector( "list", ngroups )
 	groupinfo <- matrix( 0, nrow = ngroups, ncol = 5 )
@@ -29,7 +29,7 @@ tsrm_make_datalist_groups <- function( tsrm_data=NULL, names_list=NULL )
 		for ( nv in seq( no_var ) ) {
 
 			#- temporary data frame for rr-variables for the measure 
-			tmp_data <- tsrm_data[tsrm_data[,g_var] == groups[ng] & tsrm_data[,"measure",] == nv,]
+			tmp_data <- data[data[,g_var] == groups[ng] & data[,"measure",] == nv,]
 
 			#- get outcome vector and predictors:
 			tmp_y[[nv]] <- as.matrix( tmp_data[,out] )
@@ -101,6 +101,7 @@ tsrm_make_datalist_groups <- function( tsrm_data=NULL, names_list=NULL )
 		#- make final matrices:
 		y  <- do.call( "rbind", tmp_y )
 		X  <- make_bldiag( tmp_X )
+		Zg <- make_bldiag( tmp_Zg )
 		Zp <- make_bldiag( tmp_Zp )
 		Zd <- make_bldiag( tmp_Zd )
 		Zt <- make_bldiag( tmp_Zt )
