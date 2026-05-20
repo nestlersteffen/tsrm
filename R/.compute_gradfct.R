@@ -8,11 +8,9 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	model <- match.arg( model )
 	if ( model == "srm" ) {
 		include_free_parms <- srm_include_free_parameters
-        get_sigmas         <- srm_get_sigmas
         sigma_derivatives  <- srm_sigma_derivatives
 	} else {
-		include_free_parms <- tsrm_include_free_parameters_v2
-        get_sigmas         <- tsrm_get_sigmas
+		include_free_parms <- tsrm_include_free_parameters
         sigma_derivatives  <- tsrm_sigma_derivatives
 	}
 
