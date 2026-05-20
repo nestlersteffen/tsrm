@@ -20,7 +20,7 @@ make_datalist <- function( our_data=NULL, names_list=NULL, args_list=NULL, model
 
   	#- step 2: now we combine the matrices - for version 1, ignore this step!
   	data_list <- make_datalist_combine( data_list_groups=data_list_groups, 
-  		no_var=names_list$no_var )
+  		no_var=names_list$no_var, model=model )
   	return( data_list )
 
 }

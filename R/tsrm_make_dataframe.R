@@ -33,25 +33,28 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 		tmpX 	 <- model.matrix.lm( formulas[[i]], data, na.action = "na.pass" )
 		tmpX 	 <- as.data.frame( tmpX )
 		mu_preds[[i]] <- names( tmpX )
-		new_cols <- setdiff( names(tmpX), colnames(srm_data) )
+		new_cols <- setdiff( names(tmpX), colnames( tmp_data ) )
 	    if ( length(new_cols) > 0 ) {
 	        tmp_data <- cbind( tmp_data, tmpX[, new_cols, drop=FALSE] )
 	    }
 	}
 	
 	#- add a dyad-level identifier:
+	tmp <- c("a","b","c")
+	for ( i in 1:2 ) {
+		for ( j in (i+1):3 ) {
+			tmp_data <- make_dyad_number( data=tmp_data, p_var=p_var[c(i,j)], 
+	        	g_var=g_var, dyad_name=paste0( tmp[i],tmp[j]), maxg = 1e2 )
+		}
+	}
 	d_var      <- c("ab","ac","bc")
 	d_var_type <- paste0( d_var, "_type" )
-	for ( i in seq( 3 ) {
-		tmp_data <- make_dyad_number( data=tmp_data, p_var=p_var[c(i,j)], 
-			g_var=g_var, dyad_name=d_var[i], maxg=1e2 )
-	}
-
+	
 	#- add a triad-level identifier:
+	tmp_data   <- make_triad_number( data=tmp_data, p_var=p_var, g_var=g_var )
 	t_var      <- "Triad"
 	t_var_type <- "Triad_type"
-	tmp_data   <- make_triad_number( data=tmp_data, p_var=p_var, g_var=g_var )
-
+	
 	#- now everything is in wide format; we change this to long format if necessary:
 	final_data_frame <- NULL
 	no_var <- length( names_y )
@@ -60,8 +63,8 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 		
 		for ( i in 1:no_var ) {
 			
-			tmp_data <- srm_data[,c( g_var,p_var,d_var,d_var_type,
-									 t_var,t_var_type
+			tmp_data <- tmp_data[,c( g_var,p_var,d_var,d_var_type,
+									 t_var,t_var_type,
 								     mu_preds[[i]], 
 				                     names_y[i] )]
 			colnames( tmp_data )[ ncol( tmp_data ) ] <- "y"

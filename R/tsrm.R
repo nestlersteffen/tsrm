@@ -17,7 +17,7 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
 	
 	#--- step 0: make args_list:
 	missCtrl <- missing( control )
-	if ( !missCtrl && !inherits( control, "srm_control" ) ) {
+	if ( !missCtrl && !inherits( control, "tsrm_control" ) ) {
   		if(!is.list(control)) { stop("'control' has to be a list.") }
   		args_list <- do.call( tsrm_control, control )
  	} else {
@@ -62,12 +62,12 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
    	 	g_var=g_var, formulas=formulas, data=data )
   	tsrm_data   <- tmp$data
   	names_list  <- tmp$names_list
-  	
-  	#--- make data_list
-	data_list <- tsrm_make_datalist_groups( tsrm_data = tsrm_data, names_list = names_list ) 
-	data_list <- tsrm_make_datalist_combine( data_list_groups = data_list, no_var = 1 ) 
 
-	#--- make parm_table:
+  	#--- step 3: make data_list
+	data_list <- make_datalist( srm_data=srm_data, names_list=names_list, 
+	 	args_list=args_list, model="tsrm" ) 
+  	
+  	#--- make parm_table:
 	parm_table <- tsrm_make_parmtable( )
 
 	#--- step 5: make parm_table:
