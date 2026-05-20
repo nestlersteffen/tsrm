@@ -12,7 +12,7 @@ fit <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_list=NULL
         "tsrm" = tsrm_include_free_parameters,
         stop( paste( "The srm or the tsrm can be estimated." ) )
     )
-	
+
 	#- get the start values
 	starts    <- parm_table$starts
 	
@@ -26,7 +26,7 @@ fit <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_list=NULL
 	if ( args_list$method == "c++" ) {
 		
 		#- make the optimization function:
-		obj <- make_optfct( compute_gradient, parm_list=parm_list, 
+		obj <- make_optfct( compute_gradfct, parm_list=parm_list, 
 			parm_table=parm_table, data_list=data_list, 
 			args_list=args_list, model=model, both=TRUE ) 
 
