@@ -30,7 +30,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
 	
     #- --- SRM part ---
 
-    if ( model = "srm" ) {
+    if ( model == "srm" ) {
 
         if ( no_var == 1L ) {
 
@@ -97,8 +97,8 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
                 type = c( rep( "SD_P", 6), rep( "RHO_P", 6),
                           rep( "SD_D", 6), rep( "RHO_D", 18),   
                           rep( "SD_T", 2), rep( "RHO_T", 8) ), 
-                pos1 = c(1,2,3,4,5,6, 1,1,2,4,4,5
-                         1,3,5,7,9,11, 1,3,5,1,1,3,1,1,3,7,9,11,7,7,9,7,7,9
+                pos1 = c(1,2,3,4,5,6, 1,1,2,4,4,5,
+                         1,3,5,7,9,11, 1,3,5,1,1,3,1,1,3,7,9,11,7,7,9,7,7,9,
                          1,7, 1,1,1,1,7,7,7,7),
                 pos2 = c(1,2,3,4,5,6, 2,3,3,5,6,6,
                          1,3,5,7,9,11, 2,4,6,3,6,5,4,5,6,8,10,12,9,12,11,10,11,12,

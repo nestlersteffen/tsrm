@@ -72,7 +72,8 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
 	 	args_list=args_list, model="tsrm" )
 
 	#--- step 5: make parm_list:
-	parm_list  <- make_parmlist( )
+	parm_list  <- make_parmlist( parm_table=parm_table, names_list=names_list, 
+		args_list=args_list, model="tsrm" )
 
 	result <- list( parm_table = parm_table, parm_list = parm_list, data_list = data_list, 
 		args_list = args_list, names_list = names_list, tsrm_data = tsrm_data )

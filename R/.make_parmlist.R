@@ -1,10 +1,10 @@
 
 #---- this function generates the parameter matrices per group:
 
-make_parmlist <- function( parm_table=NULL, names_list=NULL, args_list=NULL)
+make_parmlist <- function( parm_table=NULL, names_list=NULL, args_list=NULL, model=c("srm","tsrm") )
 {
 	#- get no. of variables:
-    no_var <- names_list$no_var
+    no_vars <- names_list$no_var
 	
 	#- make BETA based on number of BETA parms in parm_table
 	idx 		 <- which( parm_table$type == "BETA" )
