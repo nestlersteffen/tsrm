@@ -67,11 +67,12 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
 	data_list <- make_datalist( data=tsrm_data, names_list=names_list, 
 	 	args_list=args_list, model="tsrm" ) 
   	
-  	#--- make parm_table:
-	parm_table <- tsrm_make_parmtable( )
+  	#--- step 4: make parm_table:
+	parm_table <- make_parmtable( data_list=data_list, names_list=names_list, 
+	 	args_list=args_list, model="tsrm" )
 
-	#--- step 5: make parm_table:
-	parm_list  <- tsrm_make_parmlist( )
+	#--- step 5: make parm_list:
+	parm_list  <- make_parmlist( )
 
 	result <- list( parm_table = parm_table, parm_list = parm_list, data_list = data_list, 
 		args_list = args_list, names_list = names_list, tsrm_data = tsrm_data )
