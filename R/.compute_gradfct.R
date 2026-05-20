@@ -19,7 +19,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		parm_table=parm_table )
 
 	#- get covariance matrices
-	parm_list <- get_sigmas( parm_list=parm_list )
+	parm_list <- get_sigmas( parm_list=parm_list, model=model )
 
 	#- get parm matrices:
 	BETA 	<- parm_list[["BETA"]]

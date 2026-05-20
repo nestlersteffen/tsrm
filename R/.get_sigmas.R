@@ -12,9 +12,9 @@ get_sigmas <- function( parm_list=NULL, model=c("srm","tsrm") )
 	SD_D  <- parm_list[["SD_D"]]
 	SD_T  <- parm_list[["SD_T"]]
 	RHO_G <- parm_list[["RHO_G"]] 
-	RHO_P <- parm_list[["RHO_P"]] 
-    RHO_D <- parm_list[["RHO_D"]]  
-    RHO_T <- parm_list[["RHO_T"]]
+	RHO_P <- parm_list[["RHO_P"]]
+	RHO_D <- parm_list[["RHO_D"]]
+	RHO_T <- parm_list[["RHO_T"]]
     
     #- compute sigmas
     parm_list$SIGMA_G <- if ( model=="srm") t(SD_G) %*% RHO_G %*% SD_G else parm_list[["SIGMA_G"]]

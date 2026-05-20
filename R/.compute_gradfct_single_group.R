@@ -28,7 +28,7 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 	ng_ll <- mvtnorm::dmvnorm( ey, rep(0,ncol(V)), as.matrix(V), log = TRUE )
 
 	#- REML:
-	if ( with_reml ) {
+	if ( args_list$with_reml ) {
 		tmp   <- crossprod(X,iV)%*%X
 		ng_ll <- ng_ll - 0.5*determinant( tmp, logarithm=TRUE )$modulus[1]
 		P     <- iV - (iV%*%X)%*%base::solve(tmp)%*%(crossprod(X,iV))
