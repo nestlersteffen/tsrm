@@ -1,0 +1,49 @@
+
+#---- this function generates some starting values
+
+add_starts <- function( parm_table=NULL, data_list=NULL, args_list=NULL ) 
+{
+
+	#- define start value-, lower- and upper-bound-vector 
+  	starts <- numeric( dim( parm_table )[1] )
+  	low    <- rep( -Inf, dim( parm_table )[1] )
+  	up     <- rep(  Inf, dim( parm_table )[1] )
+
+	#- start values for BETA:
+	X 	    <- data_list$X
+	y 	    <- data_list$y
+	fit_lm  <- stats::lm(y~0+X)
+	betas   <- coef( fit_lm )
+	if ( args_list$fixed_group ) {
+		betas <- c( rep( betas[1], nrow( data_list$groupinfo) ), betas[-1] )
+	} 
+	idx <- which( parm_table$type == "BETA" )
+	starts[idx] <- betas
+
+	#- start values for variance in SIGMA_G/SD_G
+	idx <- which( parm_table$type %in% c("SIGMA_G","SD_G")  & 
+	   			  parm_table$pos1 == parm_table$pos2 )
+	starts[idx] <- 0.1#log( 1 )
+
+	#- start values for variance in SIGMA_P/SD_P
+	idx <- which( parm_table$type %in% c("SIGMA_P","SD_P") & 
+				  parm_table$pos1 == parm_table$pos2 )
+	starts[idx] <- 0.1#log( 1 )
+
+	#- start values for variance in SIGMA_D/SD_D
+	idx <- which( parm_table$type %in% c("SIGMA_D","SD_D") & 
+				  parm_table$pos1 == parm_table$pos2 )
+	starts[idx] <- 0.1#log( 1 )
+
+	#- start values for variance in SIGMA_T/SD_T
+	idx <- which( parm_table$type %in% c("SIGMA_T","SD_T")  & 
+	   			  parm_table$pos1 == parm_table$pos2 )
+	starts[idx] <- 0.5#log( 1 )
+
+	#- output:
+	parm_table$starts <- starts
+	parm_table$low    <- low
+  	parm_table$up     <- up
+	return( parm_table )
+
+}

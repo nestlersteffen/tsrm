@@ -75,7 +75,32 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
 	parm_list  <- make_parmlist( parm_table=parm_table, names_list=names_list, 
 		args_list=args_list, model="tsrm" )
 
-	result <- list( parm_table = parm_table, parm_list = parm_list, data_list = data_list, 
-		args_list = args_list, names_list = names_list, tsrm_data = tsrm_data )
-	return( result )
+	#--- step 6: add start values ( optional )
+	parm_table <- add_starts( parm_table=parm_table, data_list=data_list, 
+	 	args_list=args_list )
+
+	if ( debug ) {
+		result <- list( parm_table=parm_table, parm_list=parm_list, data_list=data_list, 
+			args_list=args_list, names_list=names_list, data=tsrm_data )
+		return( result )
+	}
+
+	#--- step 7: fit the model
+	# result <- fit_model( parm_table = parm_table, parm_list = parm_list, data_list = data_list,
+	#  	args_list = args_list ) 
+
+	# #- some warnings: 
+  	# if ( !result$converged ) {
+  	#    warning("The algorithm did not converge.")
+  	# }
+  	# if ( result$warning_vcov ) {
+  	#    warning("Hessian is not invertible. The covariance matrix of the 
+  	#    	estimates could not be computed.")
+  	# }
+  
+	# #- finally...
+	# result <- c( result, list( names_list=names_list, names_y=names_y ) ) 
+	# class( result ) <- "tsrm"
+  	return( result )
+
 }
