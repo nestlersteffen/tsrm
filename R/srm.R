@@ -88,7 +88,7 @@ srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,
 
 	#--- step 7: fit the model
 	result <- fit_model( parm_table=parm_table, parm_list=parm_list, data_list=data_list,
-	 	args_list=args_list, model="tsrm" ) 
+	 	args_list=args_list, model="srm" ) 
 
 	#- some warnings: 
   	if ( !result$converged ) {

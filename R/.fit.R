@@ -55,25 +55,42 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 			rhoP=starts[idx_rhoP], sdD=starts[idx_sdD], rhoD=starts[idx_rhoD] )
 
 		#- some adds in case of random groups:
-		if ( args_list$random_group ) {
-			
-			#- add to tdata_list:
-		 	tdata <- c( tdata, Zg = data_list$Zg, model = "srm_groups_tmb" )
-		 	
-		 	#- add to tparm
-		 	idx_sdG  <- which( parm_table$type == "SD_G")
-		 	if ( data_list$nv == 1 ) {
-		 		rhoG <- c(0)
-		 	} else if ( data_list$nv == 2 ) {
-		 		idx_rhoG <- which( parm_table$type == "RHO_G")
-		 		rhoG     <- starts[idx_rhoG]
-		 	}
-		 	tparm <- c( tparm, sdG = starts[idx_sdG], rhoG = rhoG )
+		if ( model == "srm" ) {
 
-	 	} else { 
+			if ( args_list$random_group ) {
+			
+				#- add to tdata_list:
+		 		tdata <- append( tdata, list( Zg = data_list$Zg ), 2 )
+		 		tdata <- c( tdata, model = "srm_groups_tmb" )
 		 	
-		 	tdata <- c( tdata, model = "srm_tmb" )
+		 		#- add to tparm
+		 		idx_sdG  <- which( parm_table$type == "SD_G")
+		 		if ( data_list$nv == 1 ) {
+		 			rhoG <- c(0)
+		 		} else if ( data_list$nv == 2 ) {
+		 			idx_rhoG <- which( parm_table$type == "RHO_G")
+		 			rhoG     <- starts[idx_rhoG]
+		 		}
+		 		tparm <- c( tparm, sdG = starts[idx_sdG], rhoG = rhoG )
+
+	 		} else { 
+		 	
+		 		tdata <- c( tdata, model = "srm_tmb" )
 		
+			}
+		
+		} else {
+
+			#- add to data_list:
+			tdata <- append( tdata, list( Zt = data_list$Zt ), 4 )
+			tdata <- append( tdata, list( nt = data_list$nt ), 7 )
+			tdata <- c( tdata, model = "tsrm_tmb" )
+
+			#- add to tparm:
+			idx_sdT  <- which( parm_table$type == "SD_T")
+			idx_rhoT <- which( parm_table$type == "RHO_T")
+			tparm    <- c( tparm, sdT=starts[idx_sdT], rhoT=starts[idx_rhoT] )
+
 		}
 
 		#- make tmb object:
@@ -105,8 +122,8 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 	if ( converged ) {
 		
 		#- get standard errors:
-		parm_table$est <- parm_new #srm_get_ses( parm=parm_new, parm_table=parm_table, 
-			#parm_list=parm_list, data_list=data_list, args_list=args_list ) 
+		parm_table$est <- get_ses( parm=parm_new, parm_table=parm_table, parm_list=parm_list, 
+			data_list=data_list, args_list=args_list, model=model ) 
 
 		#- deviance and aic
 		dev <- -2*ll
