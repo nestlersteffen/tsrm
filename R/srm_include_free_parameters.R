@@ -1,5 +1,4 @@
 
-
 srm_include_free_parameters <- function( parm = NULL, 
   parm_list = NULL, parm_table = NULL )
 {
@@ -32,38 +31,4 @@ srm_include_free_parameters <- function( parm = NULL,
     parm_list[[ type ]] <- x_nn       
   }
   return(parm_list)
-}
-
-srm_dmvnorm <- function( y = NULL, invSigma = NULL, use_log = TRUE )
-{
-  p <- dim( invSigma )[1]
-  logdetSigma <- -determinant( invSigma, logarithm = TRUE )$modulus[1]
-  quadval <- colSums( y * ( invSigma %*% y ) )
-  l1 <- - p * log(2*pi) - quadval - logdetSigma
-  ll <- 0.5 * l1
-  # ... 
-  if ( !use_log ) { 
-    ll <- exp(ll) 
-  }
-  return( ll )
-}
-
-tsrm_MakeOptFun <- function( grad_fn, ... ) 
-{
-  #- the cache
-  last_par <- NULL
-  last_val <- NULL
-    
-  eval_cached <- function(par) {
-    if ( !identical(par, last_par) ) {
-          last_par <<- par
-          last_val <<- grad_fn(par, ... )
-      }
-      last_val
-  }
-    
-  list(
-    fn = function(par) eval_cached(par)$objective,
-    gr = function(par) eval_cached(par)$gradient
-  )
 }
