@@ -96,6 +96,6 @@ make_args_list <- function(
 		nlminb_ctrl = nlminb_ctrl,
 		mcmc_args = mcmc_args,
 		raneffs_type = raneffs_type,
-		no_pvs = no_pvs, )
+		no_pvs = no_pvs )
 	return( args_list )
 } 
