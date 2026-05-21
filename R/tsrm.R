@@ -10,16 +10,16 @@
 #' @export
 
 tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL, 
-	control=tsrm_control(), debug = FALSE )
+	control=make_args_list(), debug = FALSE )
 {
 
 	mm <- match.call()
 	
 	#--- step 0: make args_list:
 	missCtrl <- missing( control )
-	if ( !missCtrl && !inherits( control, "tsrm_control" ) ) {
+	if ( !missCtrl && !inherits( control, "make_args_list" ) ) {
   		if(!is.list(control)) { stop("'control' has to be a list.") }
-  		args_list <- do.call( tsrm_control, control )
+  		args_list <- do.call( make_args_list, control )
  	} else {
  		args_list <- control
  	}
