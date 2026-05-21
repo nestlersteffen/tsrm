@@ -94,14 +94,14 @@ Eigen::MatrixXd tsrm_sigma_derivatives_rcpp(
 
     if ( type == 1 ) { 
         int p = SD_P.rows();
-        Eigen::MatrixXd ONE_ij = MatrixXd::Zero( p, p );
+        Eigen::MatrixXd ONE_ij = Eigen::MatrixXd::Zero( p, p );
         ONE_ij( pos(0)-1, pos(1)-1 ) = 1;
         res = ONE_ij.transpose()*RHO_P*SD_P + SD_P.transpose()*RHO_P*ONE_ij;            
     }
 
     if ( type == 2 ) {
         int p = RHO_P.rows();
-        Eigen::MatrixXd ONE_ij = MatrixXd::Zero( p, p );
+        Eigen::MatrixXd ONE_ij = Eigen::MatrixXd::Zero( p, p );
         ONE_ij( pos(0)-1, pos(1)-1 ) = 1;
         ONE_ij( pos(1)-1, pos(0)-1 ) = 1;
         res = SD_P.transpose()*ONE_ij*SD_P;       
@@ -109,7 +109,7 @@ Eigen::MatrixXd tsrm_sigma_derivatives_rcpp(
 
     if ( type == 3 ) { 
         int p = SD_D.rows();
-        Eigen::MatrixXd ONE_ij = MatrixXd::Zero( p, p );
+        Eigen::MatrixXd ONE_ij = Eigen::MatrixXd::Zero( p, p );
         ONE_ij( pos(0)-1, pos(1)-1 ) = 1;
         ONE_ij( pos(0)-1+1, pos(1)-1+1 ) = 1;
         res = ONE_ij.transpose()*RHO_D*SD_D + SD_D.transpose()*RHO_D*ONE_ij;            
@@ -117,7 +117,7 @@ Eigen::MatrixXd tsrm_sigma_derivatives_rcpp(
     
     if ( type == 4 ) {  
         int p = RHO_D.rows();
-        Eigen::MatrixXd ONE_ij = MatrixXd::Zero( p, p );
+        Eigen::MatrixXd ONE_ij = Eigen::MatrixXd::Zero( p, p );
         ONE_ij( pos(0)-1, pos(1)-1 ) = 1;
         ONE_ij( pos(1)-1, pos(0)-1 ) = 1;
         if ( ( pos(0) == 1 & pos(1) == 2 ) | ( pos(0) == 3 & pos(1) == 4 ) | ( pos(0) == 5 & pos(1) == 6 ) ) {
@@ -148,7 +148,7 @@ Eigen::MatrixXd tsrm_sigma_derivatives_rcpp(
     
     if ( type == 8 ) {  
         int p = RHO_T.rows();
-        Eigen::MatrixXd ONE_ij = MatrixXd::Zero( p, p );
+        Eigen::MatrixXd ONE_ij = Eigen::MatrixXd::Zero( p, p );
         // covariance term within judge
         if ( pos(0) == 1 & pos(1) == 2 ) {
             ONE_ij(0,1) = 1; ONE_ij(1,0) = 1; ONE_ij(2,3) = 1;

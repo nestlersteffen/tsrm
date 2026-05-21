@@ -15,23 +15,23 @@ Eigen::MatrixXd compute_V_export(
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
-    const Eigen::MatrixXd& SIGMA_T,
-    const std::string& model )
+    const Eigen::MatrixXd& SIGMA_T )
 {
-    return compute_V_rcpp( tZg, tZp, tZd, tZt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, model );
+    return compute_V_rcpp( tZg, tZp, tZd, tZt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T );
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXd srm_compute_V_sparse_export(
-    const Eigen::MatrixXd& tZg,              
-    const Eigen::SparseMatrix<double>& tZp,  
-    const Eigen::SparseMatrix<double>& tZd,  
+Eigen::MatrixXd compute_V_sparse_export(
+    const Eigen::MatrixXd& tZg,
+    const Eigen::SparseMatrix<double>& tZp,
+    const Eigen::SparseMatrix<double>& tZd,
+    const Eigen::SparseMatrix<double>& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
-    bool random_group )
+    const Eigen::SparseMatrix<double>& SIGMA_T )
 {
-    return srm_compute_V_sparse( tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D );
+    return compute_V_sparse( tZg, tZp, tZd, tZt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T );
 }
 
 // [[Rcpp::export]]
@@ -50,7 +50,7 @@ Eigen::VectorXd gradient_singlegroup_export(
     const Eigen::VectorXd& BETA,
     int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml = false, const std::string& model )
+    bool with_reml, const std::string& model )
 {
     //-- get SD and RHO matrices from parm_list:
     Eigen::MatrixXd SD_P  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_P"]);
@@ -82,7 +82,7 @@ Eigen::VectorXd gradient_singlegroup_export(
 }
 
 // [[Rcpp::export]]
-Eigen::VectorXd tsrm_gradient_singlegroup_sparse_export(
+Eigen::VectorXd gradient_singlegroup_sparse_export(
     const Rcpp::List& parm_list,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
@@ -118,7 +118,7 @@ Eigen::VectorXd tsrm_gradient_singlegroup_sparse_export(
         RHO_G = Eigen::MatrixXd(0, 0);
     }
 
-    return tsrm_gradient_singlegroup_sparse_rcpp(
+    return gradient_singlegroup_sparse_rcpp(
         SD_G, SD_P, SD_D, SD_T,
         RHO_G, RHO_P, RHO_D, RHO_T,
         ty, tX, tZg, tZp, tZd, tZt,

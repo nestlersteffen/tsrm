@@ -54,7 +54,7 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::VectorXd& BETA,
     int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml = false, const std::string& model );
+    bool with_reml = false, const std::string& model = "srm" );
 
 Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     const Eigen::MatrixXd& SD_G,
@@ -78,4 +78,4 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     const Eigen::VectorXd& BETA,
     int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml, const std::string& model );
+    bool with_reml = false, const std::string& model = "srm" );

@@ -98,7 +98,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			tZp     <- as(Zp[idx1:idx2,], "dgCMatrix")
 			tZd     <- as(Zd[idx1:idx2,], "dgCMatrix")
 			Zt_ng   <- as(Zt_ng, "dgCMatrix")
-			SIGMA_G <- if (model == "tsrm") as(matrix(0, 0, 0), "dgCMatrix") else SIGMA_G
+			SIGMA_G <- if (model == "tsrm") matrix(0, 0, 0) else SIGMA_G
 			SIGMA_P <- as(SIGMA_P, "dgCMatrix")
 			SIGMA_D <- as(SIGMA_D, "dgCMatrix")
 			SIGMA_T <- if (model == "srm") as(matrix(0, 0, 0), "dgCMatrix") else {

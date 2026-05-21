@@ -23,7 +23,7 @@ Eigen::MatrixXd compute_V_rcpp(
     return V;
 }
 
-Eigen::MatrixXd srm_compute_V_sparse(
+Eigen::MatrixXd compute_V_sparse(
     const Eigen::MatrixXd& tZg,
     const Eigen::SparseMatrix<double>& tZp,
     const Eigen::SparseMatrix<double>& tZd,
