@@ -12,60 +12,70 @@
 
 typedef Eigen::SparseMatrix<double> SpMat;
 
-Eigen::MatrixXd srm_compute_V_rcpp(
+Eigen::MatrixXd compute_V_rcpp(
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
+    const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
-    bool random_group = false );
+    const Eigen::MatrixXd& SIGMA_T );
 
-Eigen::MatrixXd srm_compute_V_sparse(
+Eigen::MatrixXd compute_V_sparse(
     const Eigen::MatrixXd& tZg,              // dense
     const Eigen::SparseMatrix<double>& tZp,  // sparse
     const Eigen::SparseMatrix<double>& tZd,  // sparse
+    const Eigen::SparseMatrix<double>& tZt,  // sparse
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
-    bool random_group = false );
+    const Eigen::SparseMatrix<double>& SIGMA_T );
 
-Eigen::VectorXd srm_gradient_singlegroup_rcpp(
+Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& SD_G,      
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
+    const Eigen::MatrixXd& SD_T,
     const Eigen::MatrixXd& RHO_G,
     const Eigen::MatrixXd& RHO_P,
     const Eigen::MatrixXd& RHO_D,
+    const Eigen::MatrixXd& RHO_T,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
+    const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
+    const Eigen::MatrixXd& SIGMA_T,
     const Eigen::VectorXd& BETA,
-    int np, int nd,
+    int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml = false, bool random_group = false );
+    bool with_reml = false, const std::string& model );
 
-Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
-    const Eigen::MatrixXd& SD_G,      
+Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
+    const Eigen::MatrixXd& SD_G,
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
+    const Eigen::MatrixXd& SD_T,
     const Eigen::MatrixXd& RHO_G,
     const Eigen::MatrixXd& RHO_P,
     const Eigen::MatrixXd& RHO_D,
+    const Eigen::MatrixXd& RHO_T,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
     const Eigen::MatrixXd& tZg,
     const Eigen::SparseMatrix<double>& tZp,  
     const Eigen::SparseMatrix<double>& tZd,  
+    const Eigen::SparseMatrix<double>& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
+    const Eigen::SparseMatrix<double>& SIGMA_T,
     const Eigen::VectorXd& BETA,
-    int np, int nd,
+    int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml = false, bool random_group = false );
+    bool with_reml, const std::string& model );

@@ -74,17 +74,60 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			}	
 		}
 			
-		#- compute ...
+		#- get group and triadic matrices:
 		Zg_ng <- if (ncol(Zg) > 0) Zg[idx1:idx2, ] else matrix(0, nrow = idx2 - idx1 + 1, ncol = 0)
 		Zt_ng <- if (ncol(Zt) > 0) Zt[idx1:idx2, ] else matrix(0, nrow = idx2 - idx1 + 1, ncol = 0)
 
-		tmp_grad <- compute_gradient_singlegroup( 
-			parm_list=parm_list, parm_table=parm_table_ng, 
-			np=np, nd=nd, nt=nt, 
-			y=y[idx1:idx2], X=X[idx1:idx2,], 
-			Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng,
-            BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
-			args_list=args_list, sigma_derivatives=sigma_derivatives )
+		if ( args_list$use_rcpp && !args_list$large ) {
+
+			#- get position matrix and type in case of rcpp:
+			parm_mat  <- as.matrix( parm_table_ng[,c("pos1","pos2","ntype","index")] )
+			storage.mode( parm_mat ) <- "integer"
+			
+			#- compute ...
+			tmp_grad <- gradient_singlegroup_export( parm_list=parm_list, 
+				ty=as.matrix(y[idx1:idx2]), tX=as.matrix(X[idx1:idx2,]), 
+				tZg=Zg_ng, tZp=Zp[idx1:idx2,], tZd=Zd[idx1:idx2,], tZt=Zt_ng,
+				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T,
+				BETA=as.vector(BETA_ng), np=np, nd=nd, nt=nt, parm_mat=parm_mat, 
+				with_reml=args_list$with_reml, model=model )
+
+		} else if ( args_list$use_rcpp && args_list$large ) {
+
+			#- make sparse matrices:
+			tZp     <- as(Zp[idx1:idx2,], "dgCMatrix")
+			tZd     <- as(Zd[idx1:idx2,], "dgCMatrix")
+			Zt_ng   <- as(Zt_ng, "dgCMatrix")
+			SIGMA_G <- if (model == "tsrm") as(matrix(0, 0, 0), "dgCMatrix") else SIGMA_G
+			SIGMA_P <- as(SIGMA_P, "dgCMatrix")
+			SIGMA_D <- as(SIGMA_D, "dgCMatrix")
+			SIGMA_T <- if (model == "srm") as(matrix(0, 0, 0), "dgCMatrix") else {
+    			SIGMA_T |> as("dgCMatrix")
+			}
+
+			#- get position matrix and type in case of rcpp:
+			parm_mat  <- as.matrix( parm_table_ng[,c("pos1","pos2","ntype","index")] )
+			storage.mode( parm_mat ) <- "integer"
+			
+			#- compute ...
+			tmp_grad <- gradient_singlegroup_sparse_export( parm_list=parm_list, 
+				ty=as.matrix(y[idx1:idx2]), tX=as.matrix(X[idx1:idx2,]), 
+				tZg=Zg_ng, tZp=tZp, tZd=tZd, tZt=Zt_ng,
+				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T,
+				BETA=as.vector(BETA_ng), np=np, nd=nd, nt=nt, parm_mat=parm_mat, 
+				with_reml=args_list$with_reml, model=model )
+
+		} else {
+
+			tmp_grad <- compute_gradient_singlegroup(
+				parm_list=parm_list, parm_table=parm_table_ng, 
+				np=np, nd=nd, nt=nt, 
+				y=y[idx1:idx2], X=X[idx1:idx2,],
+				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng,
+	            BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
+				args_list=args_list, sigma_derivatives=sigma_derivatives )
+
+		}
 
 		llfct[ng]     <- tmp_grad[ 1]
 		gradient[ng,] <- tmp_grad[-1]

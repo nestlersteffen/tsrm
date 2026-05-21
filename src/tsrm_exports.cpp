@@ -7,16 +7,18 @@
 #include "ml_helpers.h"
 
 // [[Rcpp::export]]
-Eigen::MatrixXd srm_compute_V_export(
+Eigen::MatrixXd compute_V_export(
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
+    const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
-    bool random_group )
+    const Eigen::MatrixXd& SIGMA_T,
+    const std::string& model )
 {
-    return srm_compute_V_rcpp( tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D );
+    return compute_V_rcpp( tZg, tZp, tZd, tZt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, model );
 }
 
 // [[Rcpp::export]]
@@ -33,65 +35,94 @@ Eigen::MatrixXd srm_compute_V_sparse_export(
 }
 
 // [[Rcpp::export]]
-Eigen::VectorXd srm_gradient_singlegroup_export(
+Eigen::VectorXd gradient_singlegroup_export(
     const Rcpp::List& parm_list,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
+    const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
+    const Eigen::MatrixXd& SIGMA_T,
     const Eigen::VectorXd& BETA,
-    int np, int nd,
+    int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml = false, bool random_group = false )
+    bool with_reml = false, const std::string& model )
 {
-    //-- get the parm_list matrices:
-    Eigen::MatrixXd SD_G  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_G"]);
+    //-- get SD and RHO matrices from parm_list:
     Eigen::MatrixXd SD_P  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_P"]);
     Eigen::MatrixXd SD_D  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_D"]);
-    Eigen::MatrixXd RHO_G = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_G"]);
     Eigen::MatrixXd RHO_P = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_P"]);
     Eigen::MatrixXd RHO_D = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_D"]);
     
-    //- get result:
-    return srm_gradient_singlegroup_rcpp( 
-        SD_G, SD_P, SD_D, RHO_G, RHO_P, RHO_D, 
-        ty, tX, tZg, tZp, tZd, 
-        SIGMA_G, SIGMA_P, SIGMA_D, BETA, 
-        np, nd, parm_mat, with_reml, random_group );
+    //-- model-specific matrices:
+    Eigen::MatrixXd SD_G, SD_T, RHO_G, RHO_T;
+    if ( model == "srm" ) {
+        SD_G  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_G"]);
+        RHO_G = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_G"]);
+        SD_T  = Eigen::MatrixXd(0, 0);
+        RHO_T = Eigen::MatrixXd(0, 0);
+    } else {
+        SD_T  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_T"]);
+        RHO_T = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_T"]);
+        SD_G  = Eigen::MatrixXd(0, 0);
+        RHO_G = Eigen::MatrixXd(0, 0);
+    }
+
+    return gradient_singlegroup_rcpp(
+        SD_G, SD_P, SD_D, SD_T,
+        RHO_G, RHO_P, RHO_D, RHO_T,
+        ty, tX, tZg, tZp, tZd, tZt,
+        SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
+        BETA, np, nd, nt,
+        parm_mat, with_reml, model );
 }
 
 // [[Rcpp::export]]
-Eigen::VectorXd srm_gradient_singlegroup_sparse_export(
+Eigen::VectorXd tsrm_gradient_singlegroup_sparse_export(
     const Rcpp::List& parm_list,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
-    const Eigen::MatrixXd& tZg,              
-    const Eigen::SparseMatrix<double>& tZp,  
-    const Eigen::SparseMatrix<double>& tZd,  
+    const Eigen::MatrixXd& tZg,
+    const Eigen::SparseMatrix<double>& tZp,
+    const Eigen::SparseMatrix<double>& tZd,
+    const Eigen::SparseMatrix<double>& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
+    const Eigen::SparseMatrix<double>& SIGMA_T,
     const Eigen::VectorXd& BETA,
-    int np, int nd,
+    int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml = false, bool random_group = false )
+    bool with_reml,
+    const std::string& model )
 {
-    //-- get the parm_list matrices:
-    Eigen::MatrixXd SD_G  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_G"]);
     Eigen::MatrixXd SD_P  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_P"]);
     Eigen::MatrixXd SD_D  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_D"]);
-    Eigen::MatrixXd RHO_G = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_G"]);
     Eigen::MatrixXd RHO_P = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_P"]);
     Eigen::MatrixXd RHO_D = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_D"]);
-    
-    //- get result:
-    return srm_gradient_singlegroup_sparse_rcpp( 
-        SD_G, SD_P, SD_D, RHO_G, RHO_P, RHO_D, 
-        ty, tX, tZg, tZp, tZd, 
-        SIGMA_G, SIGMA_P, SIGMA_D, BETA, 
-        np, nd, parm_mat, with_reml, random_group );
+
+    Eigen::MatrixXd SD_G, SD_T, RHO_G, RHO_T;
+    if ( model == "srm" ) {
+        SD_G  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_G"]);
+        RHO_G = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_G"]);
+        SD_T  = Eigen::MatrixXd(0, 0);
+        RHO_T = Eigen::MatrixXd(0, 0);
+    } else {
+        SD_T  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_T"]);
+        RHO_T = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_T"]);
+        SD_G  = Eigen::MatrixXd(0, 0);
+        RHO_G = Eigen::MatrixXd(0, 0);
+    }
+
+    return tsrm_gradient_singlegroup_sparse_rcpp(
+        SD_G, SD_P, SD_D, SD_T,
+        RHO_G, RHO_P, RHO_D, RHO_T,
+        ty, tX, tZg, tZp, tZd, tZt,
+        SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
+        BETA, np, nd, nt,
+        parm_mat, with_reml, model );
 }

@@ -88,7 +88,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
                 pos2 = c(1,2,3, 2,3,3,
                          1,3,5, 2,4,6,3,6,5,4,5,6,
                          1, 2,6,3,4),
-                ntype = c(rep(1,3), rep(2,3), rep(3,3), rep(4,9), 5, rep(6,4) )
+                ntype = c(rep(1,3), rep(2,3), rep(3,3), rep(4,9), 7, rep(8,4) )
             )    
 
         } else if ( no_var == 2L ) {
@@ -103,7 +103,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
                 pos2 = c(1,2,3,4,5,6, 2,3,3,5,6,6,
                          1,3,5,7,9,11, 2,4,6,3,6,5,4,5,6,8,10,12,9,12,11,10,11,12,
                          1,7, 2,6,3,4,8,12,9,10),
-                ntype = c(rep(1,6), rep(2,6), rep(3,6), rep(4,18), 5,5, rep(6,8) )
+                ntype = c(rep(1,6), rep(2,6), rep(3,6), rep(4,18), 7,7, rep(8,8) )
             ) 
 
         }

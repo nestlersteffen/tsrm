@@ -1,71 +1,108 @@
 
 #include "ml_helpers.h"
 
-Eigen::MatrixXd srm_compute_V_rcpp(
+Eigen::MatrixXd compute_V_rcpp(
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
+    const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
-    bool random_group )
+    const Eigen::MatrixXd& SIGMA_T )
 {
     Eigen::MatrixXd V = tZp * SIGMA_P * tZp.transpose() 
                       + tZd * SIGMA_D * tZd.transpose();
-    //- add random group:
-    if ( random_group ) {
-        V = V + tZg * SIGMA_G * tZg.transpose();
+    //- add group or triadic effects:
+    if ( tZt.cols() > 0 ) {
+        V += tZt * SIGMA_T * tZt.transpose();
+    }
+    if ( tZg.cols() > 0 ) {
+        V += tZg * SIGMA_G * tZg.transpose();
     }
     return V;
 }
 
 Eigen::MatrixXd srm_compute_V_sparse(
-    const Eigen::MatrixXd& tZg,              // dense
-    const Eigen::SparseMatrix<double>& tZp,  // sparse
-    const Eigen::SparseMatrix<double>& tZd,  // sparse
+    const Eigen::MatrixXd& tZg,
+    const Eigen::SparseMatrix<double>& tZp,
+    const Eigen::SparseMatrix<double>& tZd,
+    const Eigen::SparseMatrix<double>& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
-    bool random_group )
+    const Eigen::SparseMatrix<double>& SIGMA_T )
 {
-    typedef Eigen::SparseMatrix<double> SpMat;
-    
     SpMat tZp_t = tZp.transpose();
     SpMat tZd_t = tZd.transpose();
     SpMat part_p = tZp * SIGMA_P * tZp_t;
     SpMat part_d = tZd * SIGMA_D * tZd_t;
     SpMat V_sparse = part_p + part_d;
+    
+    if ( tZt.cols() > 0 ) {
+        SpMat tZt_t = tZt.transpose();
+        V_sparse += tZt * SIGMA_T * tZt_t;
+    }
+
     Eigen::MatrixXd V = Eigen::MatrixXd(V_sparse);
-    if (random_group) {
+
+    if ( tZg.cols() > 0 ) {
         Eigen::MatrixXd tZg_t = tZg.transpose();
         V += tZg * SIGMA_G * tZg_t;
     }
     return V;
 }
 
-Eigen::VectorXd srm_gradient_singlegroup_rcpp(
+Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& SD_G,      
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
+    const Eigen::MatrixXd& SD_T,
     const Eigen::MatrixXd& RHO_G,
     const Eigen::MatrixXd& RHO_P,
     const Eigen::MatrixXd& RHO_D,
+    const Eigen::MatrixXd& RHO_T,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
+    const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
+    const Eigen::MatrixXd& SIGMA_T,
     const Eigen::VectorXd& BETA,
-    int np, int nd,
+    int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml, bool random_group ) 
+    bool with_reml, const std::string& model ) 
 {
     
+    //-- set pointer to correct derivatives function:
+    typedef Eigen::MatrixXd (*DeriveFun)(
+        const Eigen::MatrixXd& SD_G,
+        const Eigen::MatrixXd& SD_P,
+        const Eigen::MatrixXd& SD_D,
+        const Eigen::MatrixXd& SD_T,
+        const Eigen::MatrixXd& RHO_G,
+        const Eigen::MatrixXd& RHO_P,
+        const Eigen::MatrixXd& RHO_D,
+        const Eigen::MatrixXd& RHO_T,
+        const int& type, const Eigen::VectorXi& pos
+    );
+    DeriveFun derivative_fun = (model == "srm")
+        ? srm_sigma_derivatives_rcpp
+        : tsrm_sigma_derivatives_rcpp;
+
     //-- Step 1: compute V:
-    Eigen::MatrixXd V = srm_compute_V_rcpp( tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, random_group );
+    Eigen::MatrixXd V = tZp * SIGMA_P * tZp.transpose()
+                      + tZd * SIGMA_D * tZd.transpose();
+    if ( tZt.cols() > 0 ) {
+        V += tZt * SIGMA_T * tZt.transpose();
+    }
+    if ( tZg.cols() > 0 ) {
+        V += tZg * SIGMA_G * tZg.transpose();
+    }
         
     //-- Step 2: compute inverse of V:
     Eigen::LDLT<Eigen::MatrixXd> ldlt(V);
@@ -101,7 +138,7 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
     for(int nn = 0; nn < NOP; nn++) {
 
         // get type of parameter:
-        int type = parm_mat(nn,2);
+        int type  = parm_mat(nn,2);
         int index = parm_mat(nn,3);
         Eigen::VectorXi pos = parm_mat.row(nn).segment<2>(0);
 
@@ -116,26 +153,30 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
         } else { // one of the covariance matrices:
 
             //- get the derivative:
-            Eigen::MatrixXd sigma_derive = srm_sigma_derivatives_rcpp( 
-                SD_G, SD_P, SD_D, RHO_G, RHO_P, RHO_D, type, pos );
+            Eigen::MatrixXd sigma_derive = derivative_fun( 
+                SD_G, SD_P, SD_D, SD_T,
+                RHO_G, RHO_P, RHO_D, RHO_T,
+                type, pos );
     
             // //- compute derivative of V depending on matrix:
             Eigen::MatrixXd tmp;
             Eigen::MatrixXd Z;
                 
-            if ( type == 1 || type == 2 ) { 
-                Eigen::MatrixXd tmp_p( np, np );
-                tmp_p.setIdentity();
-                tmp = Eigen::kroneckerProduct( tmp_p, sigma_derive );
+            if ( type == 1 || type == 2 ) {
+                tmp = Eigen::kroneckerProduct(
+                    Eigen::MatrixXd::Identity(np, np), sigma_derive );
                 Z = tZp;
             } else if ( type == 3 || type == 4 ) {
-                Eigen::MatrixXd tmp_d( nd, nd );
-                tmp_d.setIdentity();
-                tmp = Eigen::kroneckerProduct( tmp_d, sigma_derive );
+                tmp = Eigen::kroneckerProduct(
+                    Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
                 Z = tZd;
-            } else if ( type == 5 || type == 6 ) { 
+            } else if ( type == 7 || type == 8 ) {
+                tmp = Eigen::kroneckerProduct(
+                    Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
+                Z = tZt;
+            } else if ( type == 5 || type == 6 ) {
                 tmp = sigma_derive;
-                Z = tZg;
+                Z   = tZg;
             }
 
             Eigen::MatrixXd Z_t = Z.transpose();
@@ -162,29 +203,51 @@ Eigen::VectorXd srm_gradient_singlegroup_rcpp(
     return ng_grad;
 }
 
-Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
-    const Eigen::MatrixXd& SD_G,      
+Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
+    const Eigen::MatrixXd& SD_G,
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
+    const Eigen::MatrixXd& SD_T,
     const Eigen::MatrixXd& RHO_G,
     const Eigen::MatrixXd& RHO_P,
     const Eigen::MatrixXd& RHO_D,
+    const Eigen::MatrixXd& RHO_T,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
     const Eigen::MatrixXd& tZg,
     const Eigen::SparseMatrix<double>& tZp,  
     const Eigen::SparseMatrix<double>& tZd,  
+    const Eigen::SparseMatrix<double>& tZt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
+    const Eigen::SparseMatrix<double>& SIGMA_T,
     const Eigen::VectorXd& BETA,
-    int np, int nd,
+    int np, int nd, int nt,
     const Eigen::MatrixXi& parm_mat,
-    bool with_reml, bool random_group ) 
+    bool with_reml, const std::string& model ) 
 {
     
+    //-- set pointer to correct derivatives function:
+    typedef Eigen::MatrixXd (*DeriveFun)(
+        const Eigen::MatrixXd& SD_G,
+        const Eigen::MatrixXd& SD_P,
+        const Eigen::MatrixXd& SD_D,
+        const Eigen::MatrixXd& SD_T,
+        const Eigen::MatrixXd& RHO_G,
+        const Eigen::MatrixXd& RHO_P,
+        const Eigen::MatrixXd& RHO_D,
+        const Eigen::MatrixXd& RHO_T,
+        const int& type, const Eigen::VectorXi& pos
+    );
+    DeriveFun derivative_fun = (model == "srm")
+        ? srm_sigma_derivatives_rcpp
+        : tsrm_sigma_derivatives_rcpp;
+
     //-- Step 1: compute V:
-    Eigen::MatrixXd V = srm_compute_V_sparse( tZg, tZp, tZd, SIGMA_G, SIGMA_P, SIGMA_D, random_group );
+    Eigen::MatrixXd V = compute_V_sparse(
+        tZg, tZp, tZd, tZt,
+        SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T );
 
     //-- Step 2: compute inverse of V:
     Eigen::LDLT<Eigen::MatrixXd> ldlt(V);
@@ -235,8 +298,10 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
         } else { // one of the covariance matrices:
 
             //- get the derivative:
-            Eigen::MatrixXd sigma_derive = srm_sigma_derivatives_rcpp( 
-                SD_G, SD_P, SD_D, RHO_G, RHO_P, RHO_D, type, pos );
+            Eigen::MatrixXd sigma_derive = derivative_fun(
+                SD_G, SD_P, SD_D, SD_T,
+                RHO_G, RHO_P, RHO_D, RHO_T,
+                type, pos );
     
             //- compute derivative of V depending on matrix:
             Eigen::MatrixXd V_DERIVE;
@@ -256,6 +321,14 @@ Eigen::VectorXd srm_gradient_singlegroup_sparse_rcpp(
                 SpMat tZd_t = tZd.transpose();
                 SpMat ZS = tZd * tmp;
                 SpMat V_DERIVE_sparse = ZS * tZd_t;
+                V_DERIVE = Eigen::MatrixXd( V_DERIVE_sparse );
+            } else if ( type == 7 || type == 8 ) {
+                SpMat tmp_t( nt, nt );
+                tmp_t.setIdentity();
+                SpMat tmp = Eigen::kroneckerProduct( tmp_t, sigma_derive.sparseView() ).eval();
+                SpMat tZt_t = tZt.transpose();
+                SpMat ZS = tZt * tmp;
+                SpMat V_DERIVE_sparse = ZS * tZt_t;
                 V_DERIVE = Eigen::MatrixXd( V_DERIVE_sparse );
             } else if ( type == 5 || type == 6 ) {
                 Eigen::MatrixXd tZg_t = tZg.transpose();
