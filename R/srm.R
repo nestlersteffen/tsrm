@@ -100,7 +100,7 @@ srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,
   	}
   
 	#- finally...
-	result <- c( result, list( names_list = names_list, names_y = names_y ) ) 
+	result <- c( result, model="srm", list( names_list=names_list, names_y=names_y ) ) 
 	class( result ) <- "tsrm"
   	return( result )
 }

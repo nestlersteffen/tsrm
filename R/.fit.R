@@ -122,7 +122,7 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 	if ( converged ) {
 		
 		#- get standard errors:
-		parm_table$est <- get_ses( parm=parm_new, parm_table=parm_table, parm_list=parm_list, 
+		parm_table <- get_ses( parm=parm_new, parm_table=parm_table, parm_list=parm_list, 
 			data_list=data_list, args_list=args_list, model=model ) 
 
 		#- deviance and aic

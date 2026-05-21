@@ -99,7 +99,7 @@ tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL,
   	}
   
 	#- finally...
-	result <- c( result, list( names_list=names_list, names_y=names_y ) ) 
+	result <- c( result, model="tsrm", list( names_list=names_list, names_y=names_y ) )
 	class( result ) <- "tsrm"
   	return( result )
 

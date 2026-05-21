@@ -27,7 +27,7 @@ coef.tsrm  <- function(object, ...)
 
 summary.tsrm <- function( object, digits = 3L, ...)
 {
-  srm_output( object=object, digits=digits )
+  output( object=object, digits=digits )
 }
 
 #' Variance-Covariance Matrix for a tsrm Object
