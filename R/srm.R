@@ -18,9 +18,9 @@ srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,
 	
 	#--- step 0: make args_list:
 	missCtrl <- missing( control )
-	if ( !missCtrl && !inherits( control, "srm_control" ) ) {
+	if ( !missCtrl && !inherits( control, "make_args_list" ) ) {
   		if(!is.list(control)) { stop("'control' has to be a list.") }
-  		args_list <- do.call( srm_control, control )
+  		args_list <- do.call( make_args_list, control )
  	} else {
  		args_list <- control
  	}
@@ -65,30 +65,30 @@ srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,
   	names_list <- tmp$names_list
 
   	#--- step 3: make data_list
-	data_list <- srm_make_datalist( srm_data = srm_data, names_list = names_list, 
-	 	args_list = args_list ) 
+	data_list <- make_datalist( data=srm_data, names_list=names_list, 
+	 	args_list=args_list, model="srm" ) 
 
 	#--- step 4: make parm_table:
-	parm_table <- srm_make_parmtable( data_list = data_list, names_list = names_list, 
-	 	args_list = args_list )
+	parm_table <- make_parmtable( data_list=data_list, names_list=names_list, 
+	 	args_list=args_list, model="srm" )
 
 	#--- step 5: make parm_table:
-	parm_list  <- srm_make_parmlist( parm_table = parm_table, names_list = names_list, 
-	  	args_list = args_list )
+	parm_list  <- make_parmlist( parm_table=parm_table, names_list=names_list, 
+	  	args_list=args_list, model="srm" )
 
 	#--- step 6: add start values ( optional )
-	parm_table <- srm_add_starts( parm_table = parm_table, data_list = data_list, 
-	 	args_list = args_list )
+	parm_table <- add_starts( parm_table=parm_table, data_list=data_list, 
+	 	args_list=args_list )
 
 	if ( debug ) {
-		result <- list( parm_table = parm_table, parm_list = parm_list, data_list = data_list, 
-			args_list = args_list, names_list = names_list, srm_data = srm_data )
+		result <- list( parm_table=parm_table, parm_list=parm_list, data_list=data_list, 
+			args_list=args_list, names_list=names_list, srm_data=srm_data )
 		return( result )
 	}
 
 	#--- step 7: fit the model
-	result <- srm_fit( parm_table = parm_table, parm_list = parm_list, data_list = data_list,
-	 	args_list = args_list ) 
+	result <- fit_model( parm_table=parm_table, parm_list=parm_list, data_list=data_list,
+	 	args_list=args_list, model="tsrm" ) 
 
 	#- some warnings: 
   	if ( !result$converged ) {

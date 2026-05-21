@@ -85,7 +85,8 @@ srm_make_dataframe <- function( names_y = NULL, names_X = NULL, p_var = NULL,
 
 	#- output:
 	names_list <- list( g_var = g_var, p_var = p_var, d_var = d_var, d_var_type = d_var_type,
-		outcome = names_y, mu_preds = mu_preds, no_var = no_var )
+		t_var="Triad", t_var_type="Triad_type", outcome = names_y, mu_preds = mu_preds, 
+		no_var = no_var )
 	out <- list( srm_data = final_data_frame, names_list = names_list )
 	return( out )
 

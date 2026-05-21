@@ -1,7 +1,7 @@
 
 #---- this function generates the design matrices per group:
 
-srm_make_datalist_groups <- function( srm_data = NULL, names_list = NULL, 
+srm_make_datalist_groups <- function( data = NULL, names_list = NULL, 
 	args_list = NULL ) 
 {
 
@@ -9,14 +9,15 @@ srm_make_datalist_groups <- function( srm_data = NULL, names_list = NULL,
 	g_var    <- names_list[["g_var"]]
 	p_var    <- names_list[["p_var"]]
 	d_var    <- names_list[["d_var"]]
+	t_var    <- names_list[["t_var"]]
 	out      <- names_list[["outcome"]]
 	mu_preds <- names_list[["mu_preds"]] 
 
 	#- rr-group information:
-	groups    <- unique( srm_data[,g_var] )
+	groups    <- unique( data[,g_var] )
 	ngroups   <- base::length( groups)
 	tmp_list  <- vector( "list", ngroups )
-	groupinfo <- matrix( 0, nrow = ngroups, ncol = 4 )
+	groupinfo <- matrix( 0, nrow = ngroups, ncol = 5 )
 
 	#- how many variables?
 	no_var    <- names_list[["no_var"]] 
@@ -24,12 +25,12 @@ srm_make_datalist_groups <- function( srm_data = NULL, names_list = NULL,
 	#- Step 1: iterate through the groups and each measure to build the matrices:
 	for ( ng in seq(ngroups) ) {
 
-		tmp_y <- tmp_X <- tmp_Zg <- tmp_Zp <- tmp_Zd <- vector("list",no_var)
+		tmp_y <- tmp_X <- tmp_Zg <- tmp_Zp <- tmp_Zd <- tmp_Zt <- vector("list",no_var)
 
 		for ( nv in seq( no_var ) ) {
 
 			#- temporary data frame for rr-variables for the measure 
-			tmp_data <- srm_data[srm_data[,g_var] == groups[ng] & srm_data[,"measure",] == nv,]
+			tmp_data <- data[data[,g_var] == groups[ng] & data[,"measure",] == nv,]
 
 			#- sort the data:
 			# tmp_data1 <- subset( tmp_data, tmp_data[,p_var[1]] < tmp_data[,p_var[2]] )
@@ -45,10 +46,12 @@ srm_make_datalist_groups <- function( srm_data = NULL, names_list = NULL,
 
 			#- ---- make group design matrices
 
-			tmp_Zg[[nv]] <- matrix( 1.0, ncol = 1, nrow = nrow( tmp_data ) )
-			  
-			#- -------
-
+			tmp_Zg[[nv]] <- if (args_list$random_group) { 
+					matrix( 1, ncol = 1, nrow = nrow( tmp_data ) ) 
+				} else {
+					matrix(0, nrow = nrow( tmp_data ), ncol = 0)
+				}
+				
 			#- ---- make person design matrices
 
 			#- get the person identifiers:
@@ -73,8 +76,6 @@ srm_make_datalist_groups <- function( srm_data = NULL, names_list = NULL,
 			}
 			tmp_Zp[[nv]] <- Zp
 			  
-			#- -------
-
 			#- ------ make dyad design matrices
 
 			#- get the dyad identifier:
@@ -103,36 +104,31 @@ srm_make_datalist_groups <- function( srm_data = NULL, names_list = NULL,
 			tmp_Zd[[nv]] <- Zd
 			#print( tmp_Zd )
 
-			#- --------
-
-			#- ------ error matrix, in case of multiple measures
-			
-			#Ze <- NULL
-			# if ( no_vars > 1 ) {
-			# 	# ....
-			# }
+			#- ------ add triadic matrix
+			tmp_Zt[[nv]] <- matrix( 0, nrow=nrow( tmp_data ), ncol=0 )
 		
 		} 
 		
 		#- make final matrices:
 		y  <- do.call( "rbind", tmp_y )
-		X  <- srm_make_bldiag( tmp_X )
-		Zg <- srm_make_bldiag( tmp_Zg )
-		Zp <- srm_make_bldiag( tmp_Zp )
-		Zd <- srm_make_bldiag( tmp_Zd )
-		#Ze <- srm_make_bldiag( tmp_Ze )
+		X  <- make_bldiag( tmp_X )
+		Zg <- make_bldiag( tmp_Zg )
+		Zp <- make_bldiag( tmp_Zp )
+		Zd <- make_bldiag( tmp_Zd )
+		Zt <- make_bldiag( tmp_Zt )
 
 		#- ------ save everything in the list
-		tmp_list[[ng]] <- list( y = y, X = X, Zg = Zg, Zp = Zp, Zd = Zd )#, Ze = Ze )
+		tmp_list[[ng]] <- list( y=y, X=X, Zg=Zg, Zp=Zp, Zd=Zd, Zt=Zt )
 
 		#- ------ save the rest in the matrix:
 		groupinfo[ng,1] <- no_persons
 		groupinfo[ng,2] <- no_dyads
-		groupinfo[ng,3] <- base::length( y )
+		groupinfo[ng,3] <- 0
+		groupinfo[ng,4] <- base::length( y )
 	
 	} # end for ng
 
-	groupinfo[,4] <- base::cumsum( groupinfo[,3] )
+	groupinfo[,5] <- base::cumsum( groupinfo[,4] )
 
 	#- output:
 	out <- list( data_list = tmp_list, groupinfo = groupinfo ) 

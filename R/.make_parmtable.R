@@ -14,9 +14,9 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
         # get number of groups:
         ng <- nrow( data_list$groupinfo )
         # number of predictors ( minus 1 because mu_preds contains the intercept )
-        lgt_mu_preds <- no_var*( ng + length( do.call( "c", mu_preds ) ) - 1 )
+        lgt_mu_preds <- ng + length( do.call( "c", mu_preds ) ) - 1
     } else {
-        lgt_mu_preds <- no_var*( length( do.call( "c", mu_preds ) ) )
+        lgt_mu_preds <- length( do.call( "c", mu_preds ) )
     }
     
     parm_table_BETA <- data.frame( 
@@ -46,7 +46,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
 
                 parm_table_GROUP <- data.frame( 
                     type=c("SD_G"), pos1=c(1), pos2=c(1), ntype=c(5) )
-                parm_table_SDCOR <- rbind( parm_table_SDCOR, parm_table_group )
+                parm_table_SDCOR <- rbind( parm_table_SDCOR, parm_table_GROUP )
 
             }
 
@@ -64,7 +64,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
 
                 parm_table_GROUP <- data.frame( 
                     type=c("SD_G","SD_G","RHO_G"), pos1=c(1,2,1), pos2=c(1,2,2), ntype=c(5,5,6) )
-                parm_table_SDCOR <- rbind( parm_table_SDCOR, parm_table_group )
+                parm_table_SDCOR <- rbind( parm_table_SDCOR, parm_table_GROUP )
 
             }
 

@@ -46,12 +46,12 @@ Eigen::MatrixXd srm_sigma_derivatives_rcpp(
         ONE_ij( pos(0)-1, pos(1)-1 ) = 1;
         ONE_ij( pos(1)-1, pos(0)-1 ) = 1;
         if ( pos(0) == 1 && pos(1) == 3 ) {
-            ONE_ij( pos(0)+1, pos(1)+1 ) = 1;
-            ONE_ij( pos(1)+1, pos(0)+1 ) = 1;
+            ONE_ij( pos(0)-1+1, pos(1)-1+1 ) = 1;
+            ONE_ij( pos(1)-1+1, pos(0)-1+1 ) = 1;
         }
         if ( pos(0) == 1 && pos(1) == 4 ) {
-            ONE_ij( pos(0)+1, pos(1)-1 ) = 1;
-            ONE_ij( pos(1)-1, pos(0)+1 ) = 1;
+            ONE_ij( pos(0)-1+1, pos(1)-1-1 ) = 1;
+            ONE_ij( pos(1)-1-1, pos(0)-1+1 ) = 1;
         }
         res = SD_D.transpose()*ONE_ij*SD_D;         
     }

@@ -44,7 +44,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	#- make the matrices "big"
 	SIGMA_P <- diag(1,np) %x% SIGMA_P
 	SIGMA_D <- diag(1,nd) %x% SIGMA_D
-	SIGMA_T <- if ( ncol(Zt) > 0 ) diag(1, nt) %x% parm_list[["SIGMA_T"]]
+	SIGMA_T <- if ( ncol(Zt) > 0 ) diag(1, nt) %x% parm_list[["SIGMA_T"]] else SIGMA_T
 
 	#- get no. groups:
 	ngroups  <- nrow( groupinfo )
@@ -75,7 +75,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		}
 			
 		#- get group and triadic matrices:
-		Zg_ng <- if (ncol(Zg) > 0) Zg[idx1:idx2, ] else matrix(0, nrow = idx2 - idx1 + 1, ncol = 0)
+		Zg_ng <- if (ncol(Zg) > 0) as.matrix( Zg[idx1:idx2, ] ) else matrix(0, nrow = idx2 - idx1 + 1, ncol = 0)
 		Zt_ng <- if (ncol(Zt) > 0) Zt[idx1:idx2, ] else matrix(0, nrow = idx2 - idx1 + 1, ncol = 0)
 
 		if ( args_list$use_rcpp && !args_list$large ) {

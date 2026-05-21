@@ -1,7 +1,7 @@
 
 #---- this function contains routines to fit the SRM:
 
-fit <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_list=NULL, 
+fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_list=NULL, 
 	model=c("srm","tsrm") )
 {
 
