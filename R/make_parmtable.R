@@ -94,10 +94,10 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
         } else if ( no_var == 2L ) {
 
             parm_table_SDCOR <- data.frame( 
-                type = c( rep( "SD_P", 6), rep( "RHO_P", 6),
-                          rep( "SD_D", 6), rep( "RHO_D", 18),   
-                          rep( "SD_T", 2), rep( "RHO_T", 8) ), 
-                pos1 = c(1,2,3,4,5,6, 1,1,2,4,4,5,
+                type = c( rep( "SD_P", 6), rep( "RHO_P", 15),
+                          rep( "SD_D", 6), rep( "RHO_D", 36),   
+                          rep( "SD_T", 2), rep( "RHO_T", 14) ), 
+                pos1 = c(1,2,3,4,5,6, 1,1,2,4,4,5, 1,1,1,2,2,2,3,3,3, 
                          # dyadic sds
                          1,3,5,7,9,11,
                          # dyadic corrs within variable 
@@ -108,7 +108,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
                          1,7, 1,1,1,1,7,7,7,7,
                          # triad parms cross: 
                          1,1,1,1,1,1 ),
-                pos2 = c(1,2,3,4,5,6, 2,3,3,5,6,6,
+                pos2 = c(1,2,3,4,5,6, 2,3,3,5,6,6, 4,5,6,4,5,6,4,5,6,
                          # dyadic sds
                          1,3,5,7,9,11, 
                          # dyadic corrs within variable
@@ -119,7 +119,7 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
                          1,7, 2,6,3,4,8,12,9,10,
                          # triad parms cross: 
                          7,9,12,8,10,11 ),
-                ntype = c(rep(1,6), rep(2,6), rep(3,6), rep(4,36), 7,7, rep(8,14) )
+                ntype = c(rep(1,6), rep(2,15), rep(3,6), rep(4,36), 7,7, rep(8,14) )
             ) 
 
         }

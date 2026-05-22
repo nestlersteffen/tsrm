@@ -16,15 +16,15 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 	}
 
 	#- we build a dataframe:
-	tmp_data <- data[,c(p_var,names_y)]
+	tsrm_data <- data[,c(p_var,names_y)]
 	
 	#- add a group-variable if necessary:
 	if ( is.null( g_var ) ) {
-	  	tmp_data$group <- 1
+	  	tsrm_data$group <- 1
 	  	g_var <- "group"
 	} else {
-		tmp_data <- cbind( tmp_data, data[,g_var] )
-		colnames( tmp_data )[ncol(tmp_data)] <- g_var
+		tsrm_data <- cbind( tsrm_data, data[,g_var] )
+		colnames( tsrm_data )[ncol(tsrm_data)] <- g_var
 	}
 
 	#- are there any predictors?
@@ -33,9 +33,9 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 		tmpX 	 <- model.matrix.lm( formulas[[i]], data, na.action = "na.pass" )
 		tmpX 	 <- as.data.frame( tmpX )
 		mu_preds[[i]] <- names( tmpX )
-		new_cols <- setdiff( names(tmpX), colnames( tmp_data ) )
+		new_cols <- setdiff( names(tmpX), colnames( tsrm_data ) )
 	    if ( length(new_cols) > 0 ) {
-	        tmp_data <- cbind( tmp_data, tmpX[, new_cols, drop=FALSE] )
+	        tsrm_data <- cbind( tsrm_data, tmpX[, new_cols, drop=FALSE] )
 	    }
 	}
 	
@@ -43,7 +43,7 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 	tmp <- c("a","b","c")
 	for ( i in 1:2 ) {
 		for ( j in (i+1):3 ) {
-			tmp_data <- make_dyad_number( data=tmp_data, p_var=p_var[c(i,j)], 
+			tsrm_data <- make_dyad_number( data=tsrm_data, p_var=p_var[c(i,j)], 
 	        	g_var=g_var, dyad_name=paste0( tmp[i],tmp[j]), maxg = 1e2 )
 		}
 	}
@@ -51,7 +51,7 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 	d_var_type <- paste0( d_var, "_type" )
 	
 	#- add a triad-level identifier:
-	tmp_data   <- make_triad_number( data=tmp_data, p_var=p_var, g_var=g_var )
+	tsrm_data  <- make_triad_number( data=tsrm_data, p_var=p_var, g_var=g_var )
 	t_var      <- "Triad"
 	t_var_type <- "Triad_type"
 	
@@ -63,7 +63,7 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 		
 		for ( i in 1:no_var ) {
 			
-			tmp_data <- tmp_data[,c( g_var,p_var,d_var,d_var_type,
+			tmp_data <- tsrm_data[,c( g_var,p_var,d_var,d_var_type,
 									 t_var,t_var_type,
 								     mu_preds[[i]], 
 				                     names_y[i] )]
@@ -81,7 +81,7 @@ tsrm_make_dataframe <- function( names_y=NULL, names_X=NULL, p_var=NULL,
 
 	} else {
 		pred_cols        <- mu_preds[[1]]
-		final_data_frame <- tmp_data[ complete.cases( tmp_data[, c(pred_cols, names_y)] ), ]
+		final_data_frame <- tsrm_data[ complete.cases( tsrm_data[, c(pred_cols, names_y)] ), ]
 		final_data_frame$measure <- 1		
 	
 	}
