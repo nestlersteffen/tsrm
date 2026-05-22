@@ -8,6 +8,7 @@
 #' @useDynLib tsrm, .registration = TRUE
 #' @useDynLib tsrm_TMBExports, .registration = TRUE
 #' @importFrom TMB MakeADFun
+#' @importFrom methods as
 #' @import Rcpp
 #' @import RcppEigen
 #' @import stats

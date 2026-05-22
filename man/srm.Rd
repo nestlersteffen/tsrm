@@ -10,7 +10,7 @@ srm(
   p_var = NULL,
   d_var = NULL,
   data = NULL,
-  control = srm_control(),
+  control = make_args_list(),
   debug = FALSE
 )
 }

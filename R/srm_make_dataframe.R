@@ -47,8 +47,7 @@ srm_make_dataframe <- function( names_y = NULL, names_X = NULL, p_var = NULL,
 	#- add a dyad-level identifier?
 	d_var_type <- NULL
 	if ( is.null( d_var ) ) {
-	  	srm_data   <- srm_make_dyad_number( srm_data = srm_data, p_var = p_var, 
-	  		g_var = g_var )  	
+	  	srm_data   <- make_dyad_number( data=srm_data, p_var=p_var, g_var=g_var )  	
 	  	d_var      <- "Dyad"
 	  	d_var_type <- "Dyad_type" 
 	}

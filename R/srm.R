@@ -11,7 +11,7 @@
 #' @export
 
 srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,  
-	data = NULL, control = srm_control(), debug = FALSE )
+	data = NULL, control = make_args_list(), debug = FALSE )
 {
 
 	mm <- match.call()

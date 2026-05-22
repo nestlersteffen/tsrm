@@ -25,7 +25,7 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	 		#- get matrices:
 	 		Zp <- tmp_list[[ng]][["Zp"]]
 	 		Zd <- tmp_list[[ng]][["Zd"]]
-	 		Zt <- ng_data_list[[ng]][["Ze"]]
+	 		Zt <- tmp_list[[ng]][["Zt"]]
 			
 	 		#- make them greater
 	 		Zp <- cbind( Zp, matrix( 0, nrow = nrow( Zp ), ncol = max_pcolsize - ncol( Zp ) ) )

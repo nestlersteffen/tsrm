@@ -10,7 +10,7 @@ Description:
 Depends:
     R (>= 4.5)
 Imports: 
-    TMB, Rcpp, RcppEigen, stats, utils, mvtnorm, numDeriv, nloptr
+    TMB, Rcpp, RcppEigen, stats, utils, mvtnorm, numDeriv, nloptr, methods
 LinkingTo:
     TMB, Rcpp, RcppEigen
 License: GPL (>= 2)
