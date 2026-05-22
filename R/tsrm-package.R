@@ -9,7 +9,7 @@
 #' @useDynLib tsrm_TMBExports, .registration = TRUE
 #' @importFrom TMB MakeADFun
 #' @import Rcpp
-#' @import RcppArmadillo
+#' @import RcppEigen
 #' @import stats
 #' @import utils
 #' @import mvtnorm

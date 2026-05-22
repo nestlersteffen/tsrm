@@ -2,7 +2,6 @@
 % Please edit documentation in R/tsrm-package.R
 \docType{package}
 \name{tsrm-package}
-\alias{tsrm}
 \alias{tsrm-package}
 \title{tsrm: Fit triadic and dyadic round-robin data}
 \description{
