@@ -98,12 +98,28 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
                           rep( "SD_D", 6), rep( "RHO_D", 18),   
                           rep( "SD_T", 2), rep( "RHO_T", 8) ), 
                 pos1 = c(1,2,3,4,5,6, 1,1,2,4,4,5,
-                         1,3,5,7,9,11, 1,3,5,1,1,3,1,1,3,7,9,11,7,7,9,7,7,9,
-                         1,7, 1,1,1,1,7,7,7,7),
+                         # dyadic sds
+                         1,3,5,7,9,11,
+                         # dyadic corrs within variable 
+                         1,3,5,1,1,3,1,1,3,7,9,11,7,7,9,7,7,9,
+                         # dyad corrs across variables
+                         1,1,1,1,1,1, 3,3,3,3,3,3, 5,5,5,5,5,5,
+                         # triad parms within:
+                         1,7, 1,1,1,1,7,7,7,7,
+                         # triad parms cross: 
+                         1,1,1,1,1,1 ),
                 pos2 = c(1,2,3,4,5,6, 2,3,3,5,6,6,
-                         1,3,5,7,9,11, 2,4,6,3,6,5,4,5,6,8,10,12,9,12,11,10,11,12,
-                         1,7, 2,6,3,4,8,12,9,10),
-                ntype = c(rep(1,6), rep(2,6), rep(3,6), rep(4,18), 7,7, rep(8,8) )
+                         # dyadic sds
+                         1,3,5,7,9,11, 
+                         # dyadic corrs within variable
+                         2,4,6,3,6,5,4,5,6,8,10,12,9,12,11,10,11,12,
+                         # dyadic corrs across variables
+                         7,8,9,10,11,12, 7,8,9,10,11,12, 7,8,9,10,11,12,
+                         # triad parms within:
+                         1,7, 2,6,3,4,8,12,9,10,
+                         # triad parms cross: 
+                         7,9,12,8,10,11 ),
+                ntype = c(rep(1,6), rep(2,6), rep(3,6), rep(4,36), 7,7, rep(8,14) )
             ) 
 
         }
