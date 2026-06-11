@@ -68,6 +68,8 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
     const Eigen::MatrixXd& tZt,
+    const Eigen::MatrixXd& Pp, 
+    const Eigen::MatrixXd& Pd,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
@@ -165,10 +167,12 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
             if ( type == 1 || type == 2 ) {
                 tmp = Eigen::kroneckerProduct(
                     Eigen::MatrixXd::Identity(np, np), sigma_derive );
+                tmp = Pp * tmp * Pp.transpose();
                 Z = tZp;
             } else if ( type == 3 || type == 4 ) {
                 tmp = Eigen::kroneckerProduct(
                     Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
+                tmp = Pd * tmp * Pd.transpose();
                 Z = tZd;
             } else if ( type == 7 || type == 8 ) {
                 tmp = Eigen::kroneckerProduct(
@@ -218,6 +222,8 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     const Eigen::SparseMatrix<double>& tZp,  
     const Eigen::SparseMatrix<double>& tZd,  
     const Eigen::SparseMatrix<double>& tZt,
+    const Eigen::SparseMatrix<double>& Pp, 
+    const Eigen::SparseMatrix<double>& Pd,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
@@ -310,6 +316,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
                 SpMat tmp_p( np, np );
                 tmp_p.setIdentity();
                 SpMat tmp = Eigen::kroneckerProduct( tmp_p, sigma_derive.sparseView() ).eval();
+                tmp = Pp * tmp * Pp.transpose();
                 SpMat tZp_t = tZp.transpose();
                 SpMat ZS = tZp * tmp;
                 SpMat V_DERIVE_sparse = ZS * tZp_t;
@@ -318,6 +325,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
                 SpMat tmp_d( nd, nd );
                 tmp_d.setIdentity();
                 SpMat tmp = Eigen::kroneckerProduct( tmp_d, sigma_derive.sparseView() ).eval();
+                tmp = Pd * tmp * Pd.transpose() ;
                 SpMat tZd_t = tZd.transpose();
                 SpMat ZS = tZd * tmp;
                 SpMat V_DERIVE_sparse = ZS * tZd_t;

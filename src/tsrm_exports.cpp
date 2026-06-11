@@ -43,6 +43,8 @@ Eigen::VectorXd gradient_singlegroup_export(
     const Eigen::MatrixXd& tZp,
     const Eigen::MatrixXd& tZd,
     const Eigen::MatrixXd& tZt,
+    const Eigen::MatrixXd& Pp, 
+    const Eigen::MatrixXd& Pd,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
@@ -75,7 +77,7 @@ Eigen::VectorXd gradient_singlegroup_export(
     return gradient_singlegroup_rcpp(
         SD_G, SD_P, SD_D, SD_T,
         RHO_G, RHO_P, RHO_D, RHO_T,
-        ty, tX, tZg, tZp, tZd, tZt,
+        ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, 
         SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
         BETA, np, nd, nt,
         parm_mat, with_reml, model );
@@ -90,6 +92,8 @@ Eigen::VectorXd gradient_singlegroup_sparse_export(
     const Eigen::SparseMatrix<double>& tZp,
     const Eigen::SparseMatrix<double>& tZd,
     const Eigen::SparseMatrix<double>& tZt,
+    const Eigen::SparseMatrix<double>& Pp, 
+    const Eigen::SparseMatrix<double>& Pd,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
@@ -121,7 +125,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_export(
     return gradient_singlegroup_sparse_rcpp(
         SD_G, SD_P, SD_D, SD_T,
         RHO_G, RHO_P, RHO_D, RHO_T,
-        ty, tX, tZg, tZp, tZd, tZt,
+        ty, tX, tZg, tZp, tZd, tZt, Pp, Pd,
         SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
         BETA, np, nd, nt,
         parm_mat, with_reml, model );

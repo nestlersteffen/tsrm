@@ -3,7 +3,7 @@
 
 compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL, 
 	np=NULL, nd=NULL, nt=NULL, 
-	y=NULL, X=NULL, Zg=NULL, Zp=NULL, Zd=NULL, Zt=NULL, 
+	y=NULL, X=NULL, Zg=NULL, Zp=NULL, Zd=NULL, Zt=NULL, Pp=NULL, Pd=NULL, 
 	BETA=NULL, SIGMA_G=NULL, SIGMA_P=NULL, SIGMA_D=NULL, SIGMA_T=NULL, 
 	args_list=FALSE, sigma_derivatives=NULL )
 {
@@ -62,10 +62,10 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 	  
 		    #- compute derivative of V depending on matrix:
 		    if ( type %in% c("SD_P","RHO_P") ) { # c("SIGMA_P")
-		    	tmp <- diag(1, np ) %x% sigma_derive
+		    	tmp <- Pp %*% ( diag(1, np ) %x% sigma_derive ) %*% t( Pp )
 		    	Z   <- Zp
 		    } else if ( type %in% c("SD_D","RHO_D") ) { # c("SIGMA_D")
-		    	tmp <- diag(1, nd ) %x% sigma_derive
+		    	tmp <- Pd %*% ( diag(1, nd ) %x% sigma_derive ) %*% t( Pd )
 		    	Z   <- Zd
 		    } else if ( type %in% c("SD_T","RHO_T") ) {  
 		    	tmp <- diag(1, nt ) %x% sigma_derive

@@ -10,10 +10,16 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	groupinfo <- data_list_groups[["groupinfo"]]
 	ngroups   <- nrow( groupinfo )
 
+	#- get multiplier based on model:
+	pmult <- 2; dmult <- 1
+	if ( model == "tsrm" ) {
+		pmult <- 3; dmult <- 3
+	}
+
 	#- information to build big matrices
 	max_groupsize <- max( groupinfo[,1] )
-	max_pcolsize  <- no_var*(max_groupsize*2)#no_var*(max_groupsize*(max_groupsize+1))/2
-	max_dcolsize  <- no_var*(max_groupsize*(max_groupsize-1))#2*max_pcolsize
+	max_pcolsize  <- no_var*(max_groupsize*pmult)#no_var*(max_groupsize*(max_groupsize+1))/2
+	max_dcolsize  <- no_var*(max_groupsize*(max_groupsize-1)*dmult)#2*max_pcolsize
 	max_tcolsize  <- no_var*(max_groupsize*(max_groupsize-1)*(max_groupsize-2))
 
 	#- iterate across groups to add columns if necessary:
@@ -55,9 +61,13 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	nt <- max( groupinfo[,3] )
 	nv <- no_var
 
+	#- get the permutation matrix:
+	Pp <- srm_make_permutationmatrix( np=np, nv=nv )
+	Pd <- srm_make_permutationmatrix( np=nd, nv=nv )
+
 	#- output:
 	data_list <- list( y=y, X=X, Zg=Zg, Zp=Zp, Zd=Zd, Zt=Zt, groupinfo=groupinfo, 
-		np=np, nd=nd, nt=nt, nv=nv )
+		np=np, nd=nd, nt=nt, nv=nv, Pp=Pp, Pd=Pd )
 	return( data_list )
 
 }
