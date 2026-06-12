@@ -3,7 +3,8 @@
 
 compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL, 
 	np=NULL, nd=NULL, nt=NULL, 
-	y=NULL, X=NULL, Zg=NULL, Zp=NULL, Zd=NULL, Zt=NULL, Pp=NULL, Pd=NULL, 
+	y=NULL, X=NULL, Zg=NULL, Zp=NULL, Zd=NULL, Zt=NULL, 
+	Pp=NULL, Pd=NULL, Pt=NULL,
 	BETA=NULL, SIGMA_G=NULL, SIGMA_P=NULL, SIGMA_D=NULL, SIGMA_T=NULL, 
 	args_list=FALSE, sigma_derivatives=NULL )
 {
@@ -68,7 +69,7 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 		    	tmp <- Pd %*% ( diag(1, nd ) %x% sigma_derive ) %*% t( Pd )
 		    	Z   <- Zd
 		    } else if ( type %in% c("SD_T","RHO_T") ) {  
-		    	tmp <- diag(1, nt ) %x% sigma_derive
+		    	tmp <- Pt %*% ( diag(1, nt ) %x% sigma_derive ) %*% t( Pt )
 		    	Z   <- Zt
 		    } else if ( type %in% c("SD_G", "RHO_G") ) {
                 tmp <- sigma_derive                   

@@ -9,11 +9,11 @@ compute_V_sparse_export <- function(tZg, tZp, tZd, tZt, SIGMA_G, SIGMA_P, SIGMA_
     .Call(`_tsrm_compute_V_sparse_export`, tZg, tZp, tZd, tZt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T)
 }
 
-gradient_singlegroup_export <- function(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model) {
-    .Call(`_tsrm_gradient_singlegroup_export`, parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model)
+gradient_singlegroup_export <- function(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model) {
+    .Call(`_tsrm_gradient_singlegroup_export`, parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model)
 }
 
-gradient_singlegroup_sparse_export <- function(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model) {
-    .Call(`_tsrm_gradient_singlegroup_sparse_export`, parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model)
+gradient_singlegroup_sparse_export <- function(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model) {
+    .Call(`_tsrm_gradient_singlegroup_sparse_export`, parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model)
 }
 

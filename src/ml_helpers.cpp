@@ -70,6 +70,7 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& Pp, 
     const Eigen::MatrixXd& Pd,
+    const Eigen::MatrixXd& Pt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
@@ -177,6 +178,7 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
             } else if ( type == 7 || type == 8 ) {
                 tmp = Eigen::kroneckerProduct(
                     Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
+                tmp = Pt * tmp * Pt.transpose();
                 Z = tZt;
             } else if ( type == 5 || type == 6 ) {
                 tmp = sigma_derive;
@@ -224,6 +226,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     const Eigen::SparseMatrix<double>& tZt,
     const Eigen::SparseMatrix<double>& Pp, 
     const Eigen::SparseMatrix<double>& Pd,
+    const Eigen::SparseMatrix<double>& Pt,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
@@ -325,7 +328,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
                 SpMat tmp_d( nd, nd );
                 tmp_d.setIdentity();
                 SpMat tmp = Eigen::kroneckerProduct( tmp_d, sigma_derive.sparseView() ).eval();
-                tmp = Pd * tmp * Pd.transpose() ;
+                tmp = Pd * tmp * Pd.transpose();
                 SpMat tZd_t = tZd.transpose();
                 SpMat ZS = tZd * tmp;
                 SpMat V_DERIVE_sparse = ZS * tZd_t;
@@ -334,6 +337,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
                 SpMat tmp_t( nt, nt );
                 tmp_t.setIdentity();
                 SpMat tmp = Eigen::kroneckerProduct( tmp_t, sigma_derive.sparseView() ).eval();
+                tmp = Pt * tmp * Pt.transpose();
                 SpMat tZt_t = tZt.transpose();
                 SpMat ZS = tZt * tmp;
                 SpMat V_DERIVE_sparse = ZS * tZt_t;

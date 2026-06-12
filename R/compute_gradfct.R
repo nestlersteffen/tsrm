@@ -42,11 +42,12 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	nv <- data_list[["nv"]]
 	Pp <- data_list[["Pp"]]
 	Pd <- data_list[["Pd"]]
+	Pt <- data_list[["Pt"]]
 	
 	#- make the matrices "big"
 	SIGMA_P <- Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
 	SIGMA_D <- Pd %*% ( diag(1,nd) %x% SIGMA_D ) %*% t( Pd )
-	SIGMA_T <- if ( ncol(Zt) > 0 ) diag(1, nt) %x% parm_list[["SIGMA_T"]] else SIGMA_T
+	SIGMA_T <- if ( ncol(Zt) > 0 ) Pt %*% ( diag(1, nt) %x% parm_list[["SIGMA_T"]] ) %*% t( Pt ) else SIGMA_T
 
 	#- get no. groups:
 	ngroups  <- nrow( groupinfo )
@@ -90,7 +91,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			tmp_grad <- gradient_singlegroup_export( parm_list=parm_list, 
 				ty=as.matrix(y[idx1:idx2]), tX=as.matrix(X[idx1:idx2,]), 
 				tZg=Zg_ng, tZp=Zp[idx1:idx2,], tZd=Zd[idx1:idx2,], tZt=Zt_ng,
-				Pp=Pp, Pd=Pd,
+				Pp=Pp, Pd=Pd, Pt=Pt,
 				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T,
 				BETA=as.vector(BETA_ng), np=np, nd=nd, nt=nt, parm_mat=parm_mat, 
 				with_reml=args_list$with_reml, model=model )
@@ -103,6 +104,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			Zt_ng   <- as(Zt_ng, "dgCMatrix")
 			Pp      <- as(Pp, "dgCMatrix")
 			Pd      <- as(Pd, "dgCMatrix")
+			Pt      <- as(Pt, "dgCMatrix")
 			SIGMA_G <- if (model == "tsrm") matrix(0, 0, 0) else SIGMA_G
 			SIGMA_P <- as(SIGMA_P, "dgCMatrix")
 			SIGMA_D <- as(SIGMA_D, "dgCMatrix")
@@ -117,7 +119,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			#- compute ...
 			tmp_grad <- gradient_singlegroup_sparse_export( parm_list=parm_list, 
 				ty=as.matrix(y[idx1:idx2]), tX=as.matrix(X[idx1:idx2,]), 
-				tZg=Zg_ng, tZp=tZp, tZd=tZd, tZt=Zt_ng, Pp=Pp, Pd=Pd,
+				tZg=Zg_ng, tZp=tZp, tZd=tZd, tZt=Zt_ng, Pp=Pp, Pd=Pd, Pt=Pt,
 				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T,
 				BETA=as.vector(BETA_ng), np=np, nd=nd, nt=nt, parm_mat=parm_mat, 
 				with_reml=args_list$with_reml, model=model )
@@ -128,7 +130,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 				parm_list=parm_list, parm_table=parm_table_ng, 
 				np=np, nd=nd, nt=nt, 
 				y=y[idx1:idx2], X=X[idx1:idx2,],
-				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng, Pp=Pp, Pd=Pd,
+				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng, Pp=Pp, Pd=Pd, Pt=Pt,
 	            BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
 				args_list=args_list, sigma_derivatives=sigma_derivatives )
 

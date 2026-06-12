@@ -123,7 +123,7 @@ srm_make_datalist_groups <- function( data = NULL, names_list = NULL,
 		#- ------ save the rest in the matrix:
 		groupinfo[ng,1] <- no_persons
 		groupinfo[ng,2] <- no_dyads
-		groupinfo[ng,3] <- 0
+		groupinfo[ng,3] <- 1
 		groupinfo[ng,4] <- base::length( y )
 	
 	} # end for ng

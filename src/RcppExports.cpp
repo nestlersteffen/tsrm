@@ -48,8 +48,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gradient_singlegroup_export
-Eigen::VectorXd gradient_singlegroup_export(const Rcpp::List& parm_list, const Eigen::MatrixXd& ty, const Eigen::MatrixXd& tX, const Eigen::MatrixXd& tZg, const Eigen::MatrixXd& tZp, const Eigen::MatrixXd& tZd, const Eigen::MatrixXd& tZt, const Eigen::MatrixXd& Pp, const Eigen::MatrixXd& Pd, const Eigen::MatrixXd& SIGMA_G, const Eigen::MatrixXd& SIGMA_P, const Eigen::MatrixXd& SIGMA_D, const Eigen::MatrixXd& SIGMA_T, const Eigen::VectorXd& BETA, int np, int nd, int nt, const Eigen::MatrixXi& parm_mat, bool with_reml, const std::string& model);
-RcppExport SEXP _tsrm_gradient_singlegroup_export(SEXP parm_listSEXP, SEXP tySEXP, SEXP tXSEXP, SEXP tZgSEXP, SEXP tZpSEXP, SEXP tZdSEXP, SEXP tZtSEXP, SEXP PpSEXP, SEXP PdSEXP, SEXP SIGMA_GSEXP, SEXP SIGMA_PSEXP, SEXP SIGMA_DSEXP, SEXP SIGMA_TSEXP, SEXP BETASEXP, SEXP npSEXP, SEXP ndSEXP, SEXP ntSEXP, SEXP parm_matSEXP, SEXP with_remlSEXP, SEXP modelSEXP) {
+Eigen::VectorXd gradient_singlegroup_export(const Rcpp::List& parm_list, const Eigen::MatrixXd& ty, const Eigen::MatrixXd& tX, const Eigen::MatrixXd& tZg, const Eigen::MatrixXd& tZp, const Eigen::MatrixXd& tZd, const Eigen::MatrixXd& tZt, const Eigen::MatrixXd& Pp, const Eigen::MatrixXd& Pd, const Eigen::MatrixXd& Pt, const Eigen::MatrixXd& SIGMA_G, const Eigen::MatrixXd& SIGMA_P, const Eigen::MatrixXd& SIGMA_D, const Eigen::MatrixXd& SIGMA_T, const Eigen::VectorXd& BETA, int np, int nd, int nt, const Eigen::MatrixXi& parm_mat, bool with_reml, const std::string& model);
+RcppExport SEXP _tsrm_gradient_singlegroup_export(SEXP parm_listSEXP, SEXP tySEXP, SEXP tXSEXP, SEXP tZgSEXP, SEXP tZpSEXP, SEXP tZdSEXP, SEXP tZtSEXP, SEXP PpSEXP, SEXP PdSEXP, SEXP PtSEXP, SEXP SIGMA_GSEXP, SEXP SIGMA_PSEXP, SEXP SIGMA_DSEXP, SEXP SIGMA_TSEXP, SEXP BETASEXP, SEXP npSEXP, SEXP ndSEXP, SEXP ntSEXP, SEXP parm_matSEXP, SEXP with_remlSEXP, SEXP modelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -62,6 +62,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type tZt(tZtSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Pp(PpSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Pd(PdSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Pt(PtSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type SIGMA_G(SIGMA_GSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type SIGMA_P(SIGMA_PSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type SIGMA_D(SIGMA_DSEXP);
@@ -73,13 +74,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type parm_mat(parm_matSEXP);
     Rcpp::traits::input_parameter< bool >::type with_reml(with_remlSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type model(modelSEXP);
-    rcpp_result_gen = Rcpp::wrap(gradient_singlegroup_export(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model));
+    rcpp_result_gen = Rcpp::wrap(gradient_singlegroup_export(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model));
     return rcpp_result_gen;
 END_RCPP
 }
 // gradient_singlegroup_sparse_export
-Eigen::VectorXd gradient_singlegroup_sparse_export(const Rcpp::List& parm_list, const Eigen::MatrixXd& ty, const Eigen::MatrixXd& tX, const Eigen::MatrixXd& tZg, const Eigen::SparseMatrix<double>& tZp, const Eigen::SparseMatrix<double>& tZd, const Eigen::SparseMatrix<double>& tZt, const Eigen::SparseMatrix<double>& Pp, const Eigen::SparseMatrix<double>& Pd, const Eigen::MatrixXd& SIGMA_G, const Eigen::SparseMatrix<double>& SIGMA_P, const Eigen::SparseMatrix<double>& SIGMA_D, const Eigen::SparseMatrix<double>& SIGMA_T, const Eigen::VectorXd& BETA, int np, int nd, int nt, const Eigen::MatrixXi& parm_mat, bool with_reml, const std::string& model);
-RcppExport SEXP _tsrm_gradient_singlegroup_sparse_export(SEXP parm_listSEXP, SEXP tySEXP, SEXP tXSEXP, SEXP tZgSEXP, SEXP tZpSEXP, SEXP tZdSEXP, SEXP tZtSEXP, SEXP PpSEXP, SEXP PdSEXP, SEXP SIGMA_GSEXP, SEXP SIGMA_PSEXP, SEXP SIGMA_DSEXP, SEXP SIGMA_TSEXP, SEXP BETASEXP, SEXP npSEXP, SEXP ndSEXP, SEXP ntSEXP, SEXP parm_matSEXP, SEXP with_remlSEXP, SEXP modelSEXP) {
+Eigen::VectorXd gradient_singlegroup_sparse_export(const Rcpp::List& parm_list, const Eigen::MatrixXd& ty, const Eigen::MatrixXd& tX, const Eigen::MatrixXd& tZg, const Eigen::SparseMatrix<double>& tZp, const Eigen::SparseMatrix<double>& tZd, const Eigen::SparseMatrix<double>& tZt, const Eigen::SparseMatrix<double>& Pp, const Eigen::SparseMatrix<double>& Pd, const Eigen::SparseMatrix<double>& Pt, const Eigen::MatrixXd& SIGMA_G, const Eigen::SparseMatrix<double>& SIGMA_P, const Eigen::SparseMatrix<double>& SIGMA_D, const Eigen::SparseMatrix<double>& SIGMA_T, const Eigen::VectorXd& BETA, int np, int nd, int nt, const Eigen::MatrixXi& parm_mat, bool with_reml, const std::string& model);
+RcppExport SEXP _tsrm_gradient_singlegroup_sparse_export(SEXP parm_listSEXP, SEXP tySEXP, SEXP tXSEXP, SEXP tZgSEXP, SEXP tZpSEXP, SEXP tZdSEXP, SEXP tZtSEXP, SEXP PpSEXP, SEXP PdSEXP, SEXP PtSEXP, SEXP SIGMA_GSEXP, SEXP SIGMA_PSEXP, SEXP SIGMA_DSEXP, SEXP SIGMA_TSEXP, SEXP BETASEXP, SEXP npSEXP, SEXP ndSEXP, SEXP ntSEXP, SEXP parm_matSEXP, SEXP with_remlSEXP, SEXP modelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -92,6 +93,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type tZt(tZtSEXP);
     Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type Pp(PpSEXP);
     Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type Pd(PdSEXP);
+    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type Pt(PtSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type SIGMA_G(SIGMA_GSEXP);
     Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type SIGMA_P(SIGMA_PSEXP);
     Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type SIGMA_D(SIGMA_DSEXP);
@@ -103,7 +105,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type parm_mat(parm_matSEXP);
     Rcpp::traits::input_parameter< bool >::type with_reml(with_remlSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type model(modelSEXP);
-    rcpp_result_gen = Rcpp::wrap(gradient_singlegroup_sparse_export(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model));
+    rcpp_result_gen = Rcpp::wrap(gradient_singlegroup_sparse_export(parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -111,8 +113,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tsrm_compute_V_export", (DL_FUNC) &_tsrm_compute_V_export, 8},
     {"_tsrm_compute_V_sparse_export", (DL_FUNC) &_tsrm_compute_V_sparse_export, 8},
-    {"_tsrm_gradient_singlegroup_export", (DL_FUNC) &_tsrm_gradient_singlegroup_export, 20},
-    {"_tsrm_gradient_singlegroup_sparse_export", (DL_FUNC) &_tsrm_gradient_singlegroup_sparse_export, 20},
+    {"_tsrm_gradient_singlegroup_export", (DL_FUNC) &_tsrm_gradient_singlegroup_export, 21},
+    {"_tsrm_gradient_singlegroup_sparse_export", (DL_FUNC) &_tsrm_gradient_singlegroup_sparse_export, 21},
     {NULL, NULL, 0}
 };
 

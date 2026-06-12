@@ -12,8 +12,10 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 
 	#- get multiplier based on model:
 	pmult <- 2; dmult <- 1
+	psize <- 2; dsize <- 2
 	if ( model == "tsrm" ) {
 		pmult <- 3; dmult <- 3
+		psize <- 3; dsize <- 6
 	}
 
 	#- information to build big matrices
@@ -62,12 +64,13 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	nv <- no_var
 
 	#- get the permutation matrix:
-	Pp <- srm_make_permutationmatrix( np=np, nv=nv )
-	Pd <- srm_make_permutationmatrix( np=nd, nv=nv )
+	Pp <- make_permutationmatrix( n_units=np, block_size=psize, nv=nv )
+	Pd <- make_permutationmatrix( n_units=nd, block_size=dsize, nv=nv )
+	Pt <- make_permutationmatrix( n_units=nt, block_size=dsize, nv=nv )
 
 	#- output:
 	data_list <- list( y=y, X=X, Zg=Zg, Zp=Zp, Zd=Zd, Zt=Zt, groupinfo=groupinfo, 
-		np=np, nd=nd, nt=nt, nv=nv, Pp=Pp, Pd=Pd )
+		np=np, nd=nd, nt=nt, nv=nv, Pp=Pp, Pd=Pd, Pt=Pt )
 	return( data_list )
 
 }
