@@ -80,14 +80,14 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		Xb <- X_ng%*%BETA_ng
 
 		#- compute covariance matrix V:
-		V <- Zp %*% SIGMA_P %*% t(Zp) +
-			 Zd %*% SIGMA_D %*% t(Zd)
+		V <- Zp_ng %*% SIGMA_P %*% t(Zp_ng) +
+			 Zd_ng %*% SIGMA_D %*% t(Zd_ng)
 
     	if ( ncol(Zt) > 0 ) {
-        	V <- V + Zt %*% SIGMA_T %*% t(Zt)
+        	V <- V + Zt_ng %*% SIGMA_T %*% t(Zt_ng)
     	}
     	if ( ncol(Zg) > 0 ) {
-        	V <- V + Zg %*% SIGMA_G %*% t(Zg)
+        	V <- V + Zg_ng %*% SIGMA_G %*% t(Zg_ng)
     	}
 
 		#- compute loglik - value

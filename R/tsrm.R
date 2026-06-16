@@ -10,7 +10,7 @@
 #' @export
 
 tsrm <- function( formula = NULL, p_var = NULL, g_var = NULL, data = NULL, 
-	control=make_args_list(), debug = FALSE )
+	control=make_args_list(), debug=FALSE )
 {
 
 	mm <- match.call()
