@@ -61,12 +61,12 @@ htsrm <- function( formula = NULL, g_var = NULL, p_var = NULL,
   	#--- step 2 and 3: make srm_data_frame 
   	tmp <- tsrm_make_dataframe( names_y = names_y, names_X = names_X, p_var = p_var,
    	 	g_var = g_var, formulas = formulas, data = data )
-  	htsrm_data <- tmp$htsrm_data
+  	htsrm_data <- tmp$data
   	names_list <- tmp$names_list
 
   	#--- step 3: make data_list
-	data_list <- make_datalist( data=htsrm_data, names_list=names_list, 
-	 	args_list=args_list, model="htsrm" ) 
+	data_list <- htsrm_make_datalist( data=htsrm_data, names_list=names_list, 
+	 	args_list=args_list ) 
 
 	#--- step 4: make parm_table:
 	parm_table <- make_parmtable( data_list=data_list, names_list=names_list, 

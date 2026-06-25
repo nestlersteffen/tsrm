@@ -30,6 +30,15 @@ make_parmlist <- function( parm_table=NULL, names_list=NULL, args_list=NULL, mod
 		SIGMA_P <- RHO_P <- diag( 1, no_vars*3 )
 		SIGMA_D <- RHO_D <- diag( 1, no_vars*6 )
 		SIGMA_T <- RHO_T <- diag( 1, no_vars*6 )
+	} else if ( model == "htsrm" ) {
+		SD_G  	<- matrix( 0, nrow=1, ncol=0 )
+		SD_P  	<- diag( 0, 5 )
+		SD_D  	<- diag( 0, 8 )
+		SD_T  	<- diag( 0, 6 )
+		SIGMA_G <- RHO_G <- matrix( 0, nrow=1, ncol=0 )
+		SIGMA_P <- RHO_P <- diag( 1, 3 )
+		SIGMA_D <- RHO_D <- diag( 1, 8 )
+		SIGMA_T <- RHO_T <- diag( 1, 6 )
 	}
 	
 	parm_list <- list( BETA=BETA, SD_G=SD_G, SD_P=SD_P, SD_D=SD_D, SD_T=SD_T, 

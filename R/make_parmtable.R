@@ -126,6 +126,37 @@ make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL,
 
     }
 
+    #- --- TSRM part ---
+
+    if ( model == "htsrm" ) {
+
+        parm_table_SDCOR <- data.frame( 
+            type = c( rep( "SD_P", 5), rep( "RHO_P", 10),
+                      rep( "SD_D", 4), rep( "RHO_D", 16),   
+                      rep( "SD_T", 1), rep( "RHO_T", 4) ), 
+            pos1 = c(1,2,3,4,5,1,1,1,1,2,2,2,3,3,4, 
+                     # dyadic sds
+                     1,3,5,7,
+                     # dyadic corrs within variable 
+                     1,3,5,7, 1,1,3,1,1,3,
+                     # dyad corrs across variables
+                     1,1,3,3,5,5,
+                     # triad parms:
+                     1, 1,1,1,1 ),
+            pos2 = c(1,2,3,4,5, 2,3,4,5,3,4,5,4,5,5,
+                     # dyadic sds
+                     1,3,5,7,
+                     # dyadic corrs within variable
+                     2,4,6,8, 3,6,5,4,5,6,
+                     # dyadic corrs across variables
+                     7,8,7,8,7,8,
+                     # triad parms:
+                     1, 2,6,3,4 ),
+            ntype = c(rep(1,5), rep(2,10), rep(3,4), rep(4,16), 7, rep(8,4) )
+        ) 
+
+    }
+
     #- combine parm_table_BETA with parm_table_SDCOR:
     parm_table <- rbind( parm_table_BETA, parm_table_SDCOR )
 
