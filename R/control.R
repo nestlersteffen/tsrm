@@ -38,12 +38,13 @@ make_args_list <- function(
 		random_group <- FALSE
 	}
 
-	if ( large ) {
-		use_rcpp <- TRUE
-	}
-
 	if ( random_group ) {
 		fixed_group <- FALSE
+	}
+
+	if ( !large | !use_rcpp ) {
+		use_rcpp <- FALSE
+		large    <- FALSE
 	}
 
 	#- make args for ML estimation:

@@ -93,9 +93,16 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
         const Eigen::MatrixXd& RHO_T,
         const int& type, const Eigen::VectorXi& pos
     );
-    DeriveFun derivative_fun = (model == "srm")
-        ? srm_sigma_derivatives_rcpp
-        : tsrm_sigma_derivatives_rcpp;
+    DeriveFun derivative_fun;
+    if ( model == "srm" ) {
+        derivative_fun = srm_sigma_derivatives_rcpp;
+    } else if ( model == "tsrm" ) {
+        derivative_fun = tsrm_sigma_derivatives_rcpp;
+    } else if ( model == "htsrm" ) {
+        derivative_fun = htsrm_sigma_derivatives_rcpp;
+    } else {
+        Rcpp::stop("Unknown model '%s' in derivative dispatch.", model);
+    }
 
     //-- Step 1: compute V:
     Eigen::MatrixXd V = tZp * SIGMA_P * tZp.transpose()
@@ -249,9 +256,16 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
         const Eigen::MatrixXd& RHO_T,
         const int& type, const Eigen::VectorXi& pos
     );
-    DeriveFun derivative_fun = (model == "srm")
-        ? srm_sigma_derivatives_rcpp
-        : tsrm_sigma_derivatives_rcpp;
+    DeriveFun derivative_fun;
+    if ( model == "srm" ) {
+        derivative_fun = srm_sigma_derivatives_rcpp;
+    } else if ( model == "tsrm" ) {
+        derivative_fun = tsrm_sigma_derivatives_rcpp;
+    } else if ( model == "htsrm" ) {
+        derivative_fun = htsrm_sigma_derivatives_rcpp;
+    } else {
+        Rcpp::stop("Unknown model '%s' in derivative dispatch.", model);
+    }
 
     //-- Step 1: compute V:
     Eigen::MatrixXd V = compute_V_sparse(
