@@ -45,6 +45,7 @@ make_triad_number <- function( data=NULL, p_var=NULL, g_var=NULL, maxg=1e2 )
                 c(three_persons[3], three_persons[1], three_persons[2]),  # Typ 5
                 c(three_persons[3], three_persons[2], three_persons[1])   # Typ 6
             )
+            perms <- perms[!duplicated(perms), ]
             
             # Finde welcher Typ:
             triad_type <- which( apply(perms, 1, function(x) all(x == config)) )

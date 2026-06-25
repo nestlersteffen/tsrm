@@ -3,6 +3,7 @@
 S3method(coef,tsrm)
 S3method(summary,tsrm)
 S3method(vcov,tsrm)
+export(htsrm)
 export(srm)
 export(tsrm)
 import(Rcpp)
