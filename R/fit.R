@@ -2,7 +2,7 @@
 #---- this function contains routines to fit the SRM:
 
 fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_list=NULL, 
-	model=c("srm","tsrm") )
+	model=c("srm","tsrm","htsrm") )
 {
 
 	#- get model and the correct function:
@@ -10,7 +10,8 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 	include_free_parms <- switch( model,
         "srm"  = srm_include_free_parameters,
         "tsrm" = tsrm_include_free_parameters,
-        stop( paste( "The srm or the tsrm can be estimated." ) )
+        "htsrm" = htsrm_include_free_parameters,
+        stop( paste( "The srm, the tsrm, or the htsrm can be estimated (fit)." ) )
     )
 
 	#- get the start values

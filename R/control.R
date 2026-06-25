@@ -9,6 +9,7 @@ make_args_list <- function(
 	n_threads = 1L,
 	large = FALSE,
 	maxit = 1000L,
+	maxeval = 5000L,
 	abs_tol = (.Machine$double.eps*10),
 	rel_tol = 1e-9,
 	step_min = 2.2e-10,
@@ -50,6 +51,7 @@ make_args_list <- function(
 		#- make default list:
 		default_list <- list( 
 			iter.max = maxit,
+			eval.max = maxeval,
 			abs.tol = abs_tol, 
 			rel.tol = rel_tol,
 			step.min = step_min, 

@@ -36,7 +36,7 @@ make_parmlist <- function( parm_table=NULL, names_list=NULL, args_list=NULL, mod
 		SD_D  	<- diag( 0, 8 )
 		SD_T  	<- diag( 0, 6 )
 		SIGMA_G <- RHO_G <- matrix( 0, nrow=1, ncol=0 )
-		SIGMA_P <- RHO_P <- diag( 1, 3 )
+		SIGMA_P <- RHO_P <- diag( 1, 5 )
 		SIGMA_D <- RHO_D <- diag( 1, 8 )
 		SIGMA_T <- RHO_T <- diag( 1, 6 )
 	}

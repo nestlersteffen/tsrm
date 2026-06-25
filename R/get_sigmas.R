@@ -1,10 +1,8 @@
 
 #---- this function computes the covariance matrices for the SRM/TSRM components:
 
-get_sigmas <- function( parm_list=NULL, model=c("srm","tsrm") )
+get_sigmas <- function( parm_list=NULL )
 {
-	
-	model <- match.arg( model )
 	
 	#- get matrices:
 	SD_G  <- parm_list[["SD_G"]]
@@ -17,10 +15,10 @@ get_sigmas <- function( parm_list=NULL, model=c("srm","tsrm") )
 	RHO_T <- parm_list[["RHO_T"]]
     
     #- compute sigmas
-    parm_list$SIGMA_G <- if ( model=="srm") t(SD_G) %*% RHO_G %*% SD_G else parm_list[["SIGMA_G"]]
+    parm_list$SIGMA_G <- if ( ncol(SD_G) > 0 ) t(SD_G) %*% RHO_G %*% SD_G else parm_list[["SIGMA_G"]]
     parm_list$SIGMA_P <- t(SD_P) %*% RHO_P %*% SD_P
     parm_list$SIGMA_D <- t(SD_D) %*% RHO_D %*% SD_D
-    parm_list$SIGMA_T <- if ( model=="tsrm") t(SD_T) %*% RHO_T %*% SD_T else parm_list[["SIGMA_G"]]
+    parm_list$SIGMA_T <- if ( ncol(SD_T) > 0 ) t(SD_T) %*% RHO_T %*% SD_T else parm_list[["SIGMA_T"]]
 	
 	#- consider the random group:
 	return( parm_list )

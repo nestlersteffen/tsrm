@@ -2,16 +2,21 @@
 #---- this function computes the log-likelihood across all groups: 
 
 compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
-	data_list=NULL, args_list=NULL, model=c("srm","tsrm"), both=TRUE ) 
+	data_list=NULL, args_list=NULL, model=c("srm","tsrm","htsrm"), both=TRUE ) 
 {
 	#- get model-specific functions.
 	model <- match.arg( model )
 	if ( model == "srm" ) {
 		include_free_parms <- srm_include_free_parameters
-        sigma_derivatives  <- srm_sigma_derivatives
-	} else {
+		sigma_derivatives  <- srm_sigma_derivatives
+	} else if ( model == "tsrm" ) {
 		include_free_parms <- tsrm_include_free_parameters
-        sigma_derivatives  <- tsrm_sigma_derivatives
+		sigma_derivatives  <- tsrm_sigma_derivatives
+	} else if ( model == "htsrm" ) {
+		include_free_parms <- htsrm_include_free_parameters
+		sigma_derivatives  <- htsrm_sigma_derivatives
+	} else {
+		stop("False model class defined (gradfct).")
 	}
 
 	#- insert parm
@@ -19,14 +24,14 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		parm_table=parm_table )
 
 	#- get covariance matrices
-	parm_list <- get_sigmas( parm_list=parm_list, model=model )
+	parm_list <- get_sigmas( parm_list=parm_list )
 
 	#- get parm matrices:
 	BETA 	<- parm_list[["BETA"]]
 	SIGMA_G <- parm_list[["SIGMA_G"]]
 	SIGMA_P <- parm_list[["SIGMA_P"]]
 	SIGMA_D <- parm_list[["SIGMA_D"]]
-    SIGMA_T <- parm_list[["SIGMA_T"]]
+	SIGMA_T <- parm_list[["SIGMA_T"]]
 
 	#- get matrices and groupinfo:
 	groupinfo <- data_list[["groupinfo"]]
@@ -131,7 +136,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 				np=np, nd=nd, nt=nt, 
 				y=y[idx1:idx2], X=X[idx1:idx2,],
 				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng, Pp=Pp, Pd=Pd, Pt=Pt,
-	            BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
+				BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
 				args_list=args_list, sigma_derivatives=sigma_derivatives )
 
 		}

@@ -82,7 +82,7 @@ htsrm <- function( formula = NULL, g_var = NULL, p_var = NULL,
 
 	if ( debug ) {
 		result <- list( parm_table=parm_table, parm_list=parm_list, data_list=data_list, 
-			args_list=args_list, names_list=names_list, srm_data=srm_data )
+			args_list=args_list, names_list=names_list, htsrm_data=htsrm_data )
 		return( result )
 	}
 

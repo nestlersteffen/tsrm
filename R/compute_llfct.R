@@ -2,15 +2,19 @@
 #---- this function computes the log-likelihood for all groups:
 
 compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
-	data_list=NULL, args_list=NULL, model=c("srm","tsrm") )
+	data_list=NULL, args_list=NULL, model=c("srm","tsrm","htsrm") )
 {
 
 	#- get model-specific functions.
 	model <- match.arg( model )
 	if ( model == "srm" ) {
 		include_free_parms <- srm_include_free_parameters
-	} else {
+	} else if ( model == "tsrm" ) {
 		include_free_parms <- tsrm_include_free_parameters
+	} else if ( model == "htsrm" ) {
+		include_free_parms <- htsrm_include_free_parameters
+	} else {
+		stop("False model class defined (gradfct).")
 	}
 
 	#- insert parm
@@ -18,14 +22,14 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		parm_table=parm_table )
 
 	#- get covariance matrices
-	parm_list <- get_sigmas( parm_list=parm_list, model=model )
+	parm_list <- get_sigmas( parm_list=parm_list )
 
 	#- get parm matrices:
 	BETA 	<- parm_list[["BETA"]]
 	SIGMA_G <- parm_list[["SIGMA_G"]]
 	SIGMA_P <- parm_list[["SIGMA_P"]]
 	SIGMA_D <- parm_list[["SIGMA_D"]]
-    SIGMA_T <- parm_list[["SIGMA_T"]]
+	SIGMA_T <- parm_list[["SIGMA_T"]]
 
 	#- get matrices and groupinfo:
 	groupinfo <- data_list[["groupinfo"]]
@@ -41,11 +45,12 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	nv <- data_list[["nv"]]
 	Pp <- data_list[["Pp"]]
 	Pd <- data_list[["Pd"]]
+	Pt <- data_list[["Pt"]]
 	
 	#- make the matrices "big"
 	SIGMA_P <- Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
 	SIGMA_D <- Pd %*% ( diag(1,nd) %x% SIGMA_D ) %*% t( Pd )
-	SIGMA_T <- if ( ncol(Zt) > 0 ) diag(1, nt) %x% parm_list[["SIGMA_T"]] else SIGMA_T
+	SIGMA_T <- if ( ncol(Zt) > 0 ) Pt %*% ( diag(1, nt) %x% parm_list[["SIGMA_T"]] ) %*% t( Pt ) else SIGMA_T
 
 	#- get no. groups:
 	ngroups  <- nrow( groupinfo )
@@ -83,12 +88,12 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		V <- Zp_ng %*% SIGMA_P %*% t(Zp_ng) +
 			 Zd_ng %*% SIGMA_D %*% t(Zd_ng)
 
-    	if ( ncol(Zt) > 0 ) {
-        	V <- V + Zt_ng %*% SIGMA_T %*% t(Zt_ng)
-    	}
-    	if ( ncol(Zg) > 0 ) {
-        	V <- V + Zg_ng %*% SIGMA_G %*% t(Zg_ng)
-    	}
+		if ( ncol(Zt) > 0 ) {
+			V <- V + Zt_ng %*% SIGMA_T %*% t(Zt_ng)
+		}
+		if ( ncol(Zg) > 0 ) {
+			V <- V + Zg_ng %*% SIGMA_G %*% t(Zg_ng)
+		}
 
 		#- compute loglik - value
 		res <- mvtnorm::dmvnorm( y_ng, Xb, as.matrix(V), log=TRUE )
