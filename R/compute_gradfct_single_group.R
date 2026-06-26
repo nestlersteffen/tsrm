@@ -37,6 +37,16 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 	
 	#- derivative for beta:
 	dBETA <- crossprod( ei, X )
+
+	# (P ist iV, oder die REML-korrigierte Version)
+	PZp <- P %*% Zp;  Mp <- crossprod(Zp, PZp);  wp <- crossprod(Zp, ei)
+	PZd <- P %*% Zd;  Md <- crossprod(Zd, PZd);  wd <- crossprod(Zd, ei)
+	if (ncol(Zt) > 0) { PZt <- P %*% Zt; Mt <- crossprod(Zt, PZt); wt <- crossprod(Zt, ei) }
+
+	# Permutationsindizes statt Matrixkonjugation:
+	perm_p <- max.col(Pp, ties.method = "first")
+	perm_d <- max.col(Pd, ties.method = "first")
+	if (ncol(Zt) > 0) perm_t <- max.col(Pt, ties.method = "first")
 	
 	#- now compute the gradient for the group:
   	NP      <- max( parm_table$index)
@@ -63,22 +73,33 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 	  
 		    #- compute derivative of V depending on matrix:
 		    if ( type %in% c("SD_P","RHO_P") ) { # c("SIGMA_P")
-		    	tmp <- Pp %*% ( diag(1, np ) %x% sigma_derive ) %*% t( Pp )
-		    	Z   <- Zp
+		    	# tmp <- Pp %*% ( diag(1, np ) %x% sigma_derive ) %*% t( Pp )
+		    	# Z   <- Zp
+		    	Sblock <- diag(1, np) %x% sigma_derive          # klein: (k_p·np)²
+			    S <- Sblock[perm_p, perm_p]                      # Permutation statt Pp %*% . %*% t(Pp)
+			    M <- Mp; w <- wp
 		    } else if ( type %in% c("SD_D","RHO_D") ) { # c("SIGMA_D")
-		    	tmp <- Pd %*% ( diag(1, nd ) %x% sigma_derive ) %*% t( Pd )
-		    	Z   <- Zd
+		    	# tmp <- Pd %*% ( diag(1, nd ) %x% sigma_derive ) %*% t( Pd )
+		    	# Z   <- Zd
+		    	Sblock <- diag(1, nd) %x% sigma_derive
+    			S <- Sblock[perm_d, perm_d]
+    			M <- Md; w <- wd
 		    } else if ( type %in% c("SD_T","RHO_T") ) {  
-		    	tmp <- Pt %*% ( diag(1, nt ) %x% sigma_derive ) %*% t( Pt )
-		    	Z   <- Zt
+		    	# tmp <- Pt %*% ( diag(1, nt ) %x% sigma_derive ) %*% t( Pt )
+		    	# Z   <- Zt
+		    	Sblock <- diag(1, nt) %x% sigma_derive
+			    S <- Sblock[perm_t, perm_t]
+			    M <- Mt; w <- wt
 		    } else if ( type %in% c("SD_G", "RHO_G") ) {
                 tmp <- sigma_derive                   
                 Z   <- Zg
             }
 
-		    V_DERIVE <- Z%*%tmp%*%t(Z)
-		    pt1      <- sum( P * V_DERIVE )
-		    pt2 	 <- ( t( ei ) %*% V_DERIVE ) %*% ei 
+		    # V_DERIVE <- Z%*%tmp%*%t(Z)
+		    # pt1      <- sum( P * V_DERIVE )
+		    # pt2 	 <- ( t( ei ) %*% V_DERIVE ) %*% ei 
+		    pt1 <- sum(S * M)                 # tr(P V') = <S, Z^T P Z>
+			pt2 <- as.numeric(crossprod(w, S %*% w))   # tei^T V' tei = w^T S w
 		    res 	 <- -0.5*( pt1 - pt2 )
 
 		}
