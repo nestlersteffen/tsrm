@@ -81,13 +81,17 @@ htsrm_make_datalist <- function( data=NULL, names_list=NULL, args_list=NULL )
 	nv <- 2
 
 	#- STEP 5: get the permutation matrix:
-	Pp <- htsrm_make_permutationmatrix( n_units=np, block_size=c(3,2), nv=nv )
-	Pd <- htsrm_make_permutationmatrix( n_units=nd, block_size=c(6,2), nv=nv )
-	Pt <- htsrm_make_permutationmatrix( n_units=nt, block_size=c(6,0), nv=nv )
+	tmp_p <- htsrm_make_permutationmatrix( n_units=np, block_size=c(3,2), nv=nv )
+	tmp_d <- htsrm_make_permutationmatrix( n_units=nd, block_size=c(6,2), nv=nv )
+	tmp_t <- htsrm_make_permutationmatrix( n_units=nt, block_size=c(6,0), nv=nv )
 
 	#- output:
 	data_list <- list( y=y, X=X, Zg=Zg, Zp=Zp, Zd=Zd, Zt=Zt, groupinfo=groupinfo, 
-		np=np, nd=nd, nt=nt, nv=nv, Pp=Pp, Pd=Pd, Pt=Pt )
+		np=np, nd=nd, nt=nt, nv=nv, 
+		Pp=tmp_p$P, Pd=tmp_d$P, Pt=tmp_t$P,
+		perm_p=tmp_p$perm, perm_d=tmp_d$perm, perm_t=tmp_t$perm, 
+		perm_inv_p=tmp_p$perm_inv,perm_inv_d=tmp_d$perm_inv,perm_inv_t=tmp_t$perm_inv
+		)
 	return( data_list )
 
 }

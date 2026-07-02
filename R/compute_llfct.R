@@ -43,14 +43,25 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	nd <- data_list[["nd"]]
 	nt <- data_list[["nt"]]
 	nv <- data_list[["nv"]]
-	Pp <- data_list[["Pp"]]
-	Pd <- data_list[["Pd"]]
-	Pt <- data_list[["Pt"]]
+	# Pp <- data_list[["Pp"]]
+	# Pd <- data_list[["Pd"]]
+	# Pt <- data_list[["Pt"]]
+	perm_p <- data_list[["perm_p"]]
+	perm_d <- data_list[["perm_d"]]
+	perm_t <- data_list[["perm_t"]]
 	
 	#- make the matrices "big"
-	SIGMA_P <- Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
-	SIGMA_D <- Pd %*% ( diag(1,nd) %x% SIGMA_D ) %*% t( Pd )
-	SIGMA_T <- if ( ncol(Zt) > 0 ) Pt %*% ( diag(1, nt) %x% parm_list[["SIGMA_T"]] ) %*% t( Pt ) else SIGMA_T
+	# SIGMA_P <- Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
+	# SIGMA_D <- Pd %*% ( diag(1,nd) %x% SIGMA_D ) %*% t( Pd )
+	# SIGMA_T <- if ( ncol(Zt) > 0 ) Pt %*% ( diag(1, nt) %x% parm_list[["SIGMA_T"]] ) %*% t( Pt ) else SIGMA_T
+	SIGMA_P <- diag(1,np) %x% SIGMA_P
+	SIGMA_P <- SIGMA_P[perm_p,perm_p]
+	SIGMA_D <- diag(1,nd) %x% SIGMA_D
+	SIGMA_D <- SIGMA_D[perm_d,perm_d]
+	if ( ncol(Zt) > 0 ) {
+		SIGMA_T <- diag(1, nt) %x% parm_list[["SIGMA_T"]] 
+		SIGMA_T <- SIGMA_T[perm_t,perm_t]
+	} 
 
 	#- get no. groups:
 	ngroups  <- nrow( groupinfo )

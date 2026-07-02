@@ -70,7 +70,7 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& tZt,
     const Eigen::MatrixXd& Pp, 
     const Eigen::MatrixXd& Pd,
-    const Eigen::MatrixXd& Pt,
+    const Eigen::MatrixXd& Pt,  
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::MatrixXd& SIGMA_P,
     const Eigen::MatrixXd& SIGMA_D,
@@ -140,6 +140,22 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
 
     //-- Step 6: derivative for beta:
     Eigen::VectorXd dBETA = tei.transpose() * tX;
+
+    //-- precompute once per group (für jeden Z-Block):
+    Eigen::MatrixXd Mg; Eigen::VectorXd wg;
+    if ( tZg.cols() > 0 ) {
+        Mg = tZg.transpose() * (P * tZg);
+        wg = tZg.transpose() * tei;
+    }
+    Eigen::MatrixXd Mp = tZp.transpose() * (P * tZp);
+    Eigen::VectorXd wp = tZp.transpose() * tei;
+    Eigen::MatrixXd Md = tZd.transpose() * (P * tZd);
+    Eigen::VectorXd wd = tZd.transpose() * tei;
+    Eigen::MatrixXd Mt; Eigen::VectorXd wt;
+    if ( tZt.cols() > 0 ) {
+        Mt = tZt.transpose() * (P * tZt);
+        wt = tZt.transpose() * tei;
+    }
     
     // -- Step 7: iterate across posmat entries for the gradient:
     int NOP = parm_mat.rows();
@@ -170,37 +186,28 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     
             // //- compute derivative of V depending on matrix:
             Eigen::MatrixXd tmp;
-            Eigen::MatrixXd Z;
+            Eigen::MatrixXd M;
+            Eigen::VectorXd w;
                 
-            if ( type == 1 || type == 2 ) {
-                tmp = Eigen::kroneckerProduct(
-                    Eigen::MatrixXd::Identity(np, np), sigma_derive );
+            if ( type == 1 || type == 2 ) { 
+                tmp = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(np, np), sigma_derive );
                 tmp = Pp * tmp * Pp.transpose();
-                Z = tZp;
+                M = Mp; w = wp;
             } else if ( type == 3 || type == 4 ) {
-                tmp = Eigen::kroneckerProduct(
-                    Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
+                tmp = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
                 tmp = Pd * tmp * Pd.transpose();
-                Z = tZd;
+                M = Md; w = wd;
             } else if ( type == 7 || type == 8 ) {
-                tmp = Eigen::kroneckerProduct(
-                    Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
+                tmp = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
                 tmp = Pt * tmp * Pt.transpose();
-                Z = tZt;
+                M = Mt; w = wt;
             } else if ( type == 5 || type == 6 ) {
                 tmp = sigma_derive;
-                Z   = tZg;
+                M = Mg; w = wg;
             }
 
-            Eigen::MatrixXd Z_t = Z.transpose();
-            Eigen::MatrixXd ZS = Z * tmp;
-            Eigen::MatrixXd V_DERIVE = ZS * Z_t;
-            Eigen::VectorXd Vtei = V_DERIVE * tei;
-
-            // compute gradient value:
-            double pt1 = P.cwiseProduct( V_DERIVE ).sum();
-            // double pt2 = (tei.transpose() * V_DERIVE * tei).value();
-            double pt2 = tei.dot( Vtei );
+            double pt1 = tmp.cwiseProduct( M ).sum();   // tr(P V') = <S, Z^T P Z>
+            double pt2 = w.dot( tmp * w );              // tei^T V' tei = w^T S w
             res = -0.5*( pt1 - pt2 );
 
         }
@@ -231,9 +238,12 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     const Eigen::SparseMatrix<double>& tZp,  
     const Eigen::SparseMatrix<double>& tZd,  
     const Eigen::SparseMatrix<double>& tZt,
-    const Eigen::SparseMatrix<double>& Pp, 
-    const Eigen::SparseMatrix<double>& Pd,
-    const Eigen::SparseMatrix<double>& Pt,
+    const Eigen::MatrixXd& Pp, 
+    const Eigen::MatrixXd& Pd,
+    const Eigen::MatrixXd& Pt, 
+    const Eigen::VectorXi& perm_p, 
+    const Eigen::VectorXi& perm_d,
+    const Eigen::VectorXi& perm_t,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
@@ -267,18 +277,21 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
         Rcpp::stop("Unknown model '%s' in derivative dispatch.", model);
     }
 
+    // using clk = std::chrono::high_resolution_clock;
+    // auto t0 = clk::now();
+
     //-- Step 1: compute V:
     Eigen::MatrixXd V = compute_V_sparse(
         tZg, tZp, tZd, tZt,
         SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T );
 
     //-- Step 2: compute inverse of V:
-    Eigen::LDLT<Eigen::MatrixXd> ldlt(V);
-    Eigen::MatrixXd iV = ldlt.solve(Eigen::MatrixXd::Identity(V.rows(), V.cols()));
+    Eigen::LLT<Eigen::MatrixXd> llt(V);
+    Eigen::MatrixXd iV = llt.solve(Eigen::MatrixXd::Identity(V.rows(), V.cols()));
 
     //-- Step 3: compute "residual":
     Eigen::VectorXd tey = ty - tX * BETA;
-    Eigen::VectorXd tei = iV * tey;
+    Eigen::VectorXd tei = llt.solve( tey );
     
     //-- Step 4: we also compute the llfct-value:
     double ng_ll = dmvnorm_centered_rcpp( tey, V, true );
@@ -286,19 +299,35 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     //-- Step 5: consider REML-Penalty:
     Eigen::MatrixXd P = iV;
     if ( with_reml ) {
-        Eigen::MatrixXd iV_X = ldlt.solve(tX);
+        Eigen::MatrixXd iV_X = llt.solve(tX);
         Eigen::MatrixXd tXt = tX.transpose();
         Eigen::MatrixXd XtiVX = tXt * iV_X;
-        Eigen::LDLT<Eigen::MatrixXd> ldlt2(XtiVX);
+        Eigen::LLT<Eigen::MatrixXd> llt2(XtiVX);
         Eigen::MatrixXd iV_Xt = iV_X.transpose();
-        Eigen::MatrixXd correction = iV_X * ldlt2.solve(iV_Xt);
+        Eigen::MatrixXd correction = iV_X * llt2.solve(iV_Xt);
         P -= correction;
         ng_ll -= 0.5*log_determinant_rcpp( XtiVX );
     }
 
     //-- Step 6: derivative for beta:
     Eigen::VectorXd dBETA = tei.transpose() * tX;
-    
+
+    //-- precompute once per group (für jeden Z-Block):
+    Eigen::MatrixXd Mg; Eigen::VectorXd wg;
+    if ( tZg.cols() > 0 ) {
+        Mg = tZg.transpose() * (P * tZg);
+        wg = tZg.transpose() * tei;
+    }
+    Eigen::MatrixXd Mp = tZp.transpose() * (P * tZp);
+    Eigen::VectorXd wp = tZp.transpose() * tei;
+    Eigen::MatrixXd Md = tZd.transpose() * (P * tZd);
+    Eigen::VectorXd wd = tZd.transpose() * tei;
+    Eigen::MatrixXd Mt; Eigen::VectorXd wt;
+    if ( tZt.cols() > 0 ) {
+        Mt = tZt.transpose() * (P * tZt);
+        wt = tZt.transpose() * tei;
+    }
+
     // -- Step 7: iterate across posmat entries for the gradient:
     int NOP = parm_mat.rows();
     int NP  = parm_mat.col(3).maxCoeff();
@@ -327,46 +356,30 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
                 type, pos );
     
             //- compute derivative of V depending on matrix:
-            Eigen::MatrixXd V_DERIVE;
+            Eigen::MatrixXd tmp;
+            Eigen::MatrixXd M;
+            Eigen::VectorXd w;
                 
             if ( type == 1 || type == 2 ) { 
-                SpMat tmp_p( np, np );
-                tmp_p.setIdentity();
-                SpMat tmp = Eigen::kroneckerProduct( tmp_p, sigma_derive.sparseView() ).eval();
-                tmp = Pp * tmp * Pp.transpose();
-                SpMat tZp_t = tZp.transpose();
-                SpMat ZS = tZp * tmp;
-                SpMat V_DERIVE_sparse = ZS * tZp_t;
-                V_DERIVE = Eigen::MatrixXd( V_DERIVE_sparse );
+                Eigen::MatrixXd tmp_s = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(np, np), sigma_derive );
+                tmp = tmp_s(perm_p,perm_p);
+                M = Mp; w = wp;
             } else if ( type == 3 || type == 4 ) {
-                SpMat tmp_d( nd, nd );
-                tmp_d.setIdentity();
-                SpMat tmp = Eigen::kroneckerProduct( tmp_d, sigma_derive.sparseView() ).eval();
-                tmp = Pd * tmp * Pd.transpose();
-                SpMat tZd_t = tZd.transpose();
-                SpMat ZS = tZd * tmp;
-                SpMat V_DERIVE_sparse = ZS * tZd_t;
-                V_DERIVE = Eigen::MatrixXd( V_DERIVE_sparse );
+                Eigen::MatrixXd tmp_s = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
+                tmp = tmp_s(perm_d,perm_d);
+                M = Md; w = wd;
             } else if ( type == 7 || type == 8 ) {
-                SpMat tmp_t( nt, nt );
-                tmp_t.setIdentity();
-                SpMat tmp = Eigen::kroneckerProduct( tmp_t, sigma_derive.sparseView() ).eval();
-                tmp = Pt * tmp * Pt.transpose();
-                SpMat tZt_t = tZt.transpose();
-                SpMat ZS = tZt * tmp;
-                SpMat V_DERIVE_sparse = ZS * tZt_t;
-                V_DERIVE = Eigen::MatrixXd( V_DERIVE_sparse );
+                Eigen::MatrixXd tmp_s = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
+                tmp = tmp_s(perm_t,perm_t);
+                M = Mt; w = wt;
             } else if ( type == 5 || type == 6 ) {
-                Eigen::MatrixXd tZg_t = tZg.transpose();
-                Eigen::MatrixXd ZSg = tZg * sigma_derive;
-                V_DERIVE = ZSg * tZg_t;
+                tmp = sigma_derive;
+                M = Mg; w = wg;
             }
 
-            Eigen::VectorXd Vtei = V_DERIVE * tei;
-
             // compute gradient value:
-            double pt1 = P.cwiseProduct( V_DERIVE ).sum();
-            double pt2 = tei.dot( Vtei );
+            double pt1 = tmp.cwiseProduct( M ).sum();   // tr(P V') = <S, Z^T P Z>
+            double pt2 = w.dot( tmp * w );
             res = -0.5*( pt1 - pt2 );
             
         }

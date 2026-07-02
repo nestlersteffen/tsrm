@@ -48,12 +48,23 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	Pp <- data_list[["Pp"]]
 	Pd <- data_list[["Pd"]]
 	Pt <- data_list[["Pt"]]
+	perm_p 	   <- data_list[["perm_p"]]
+	perm_d 	   <- data_list[["perm_d"]]
+	perm_t 	   <- data_list[["perm_t"]]
+	perm_inv_p <- data_list[["perm_inv_p"]]
+	perm_inv_d <- data_list[["perm_inv_d"]]
+	perm_inv_t <- data_list[["perm_inv_t"]]
 	
-	#- make the matrices "big"
-	SIGMA_P <- Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
-	SIGMA_D <- Pd %*% ( diag(1,nd) %x% SIGMA_D ) %*% t( Pd )
-	SIGMA_T <- if ( ncol(Zt) > 0 ) Pt %*% ( diag(1, nt) %x% parm_list[["SIGMA_T"]] ) %*% t( Pt ) else SIGMA_T
-
+	#- make the matrices "big":
+	SIGMA_P <- diag(1,np) %x% SIGMA_P
+	SIGMA_P <- SIGMA_P[perm_p,perm_p] # faster than: Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
+	SIGMA_D <- diag(1,nd) %x% SIGMA_D
+	SIGMA_D <- SIGMA_D[perm_d,perm_d]
+	if ( ncol(Zt) > 0 ) {
+		SIGMA_T <- diag(1, nt) %x% parm_list[["SIGMA_T"]] 
+		SIGMA_T <- SIGMA_T[perm_t,perm_t]
+	} 
+	
 	#- get no. groups:
 	ngroups  <- nrow( groupinfo )
 	gradient <- matrix( 0, nrow = ngroups, ncol = max( parm_table$index) ) 
@@ -91,7 +102,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			#- get position matrix and type in case of rcpp:
 			parm_mat  <- as.matrix( parm_table_ng[,c("pos1","pos2","ntype","index")] )
 			storage.mode( parm_mat ) <- "integer"
-			
+
 			#- compute ...
 			tmp_grad <- gradient_singlegroup_export( parm_list=parm_list, 
 				ty=as.matrix(y[idx1:idx2]), tX=as.matrix(X[idx1:idx2,]), 
@@ -107,9 +118,6 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			tZp     <- as(Zp[idx1:idx2,], "dgCMatrix")
 			tZd     <- as(Zd[idx1:idx2,], "dgCMatrix")
 			Zt_ng   <- as(Zt_ng, "dgCMatrix")
-			Pp      <- as(Pp, "dgCMatrix")
-			Pd      <- as(Pd, "dgCMatrix")
-			Pt      <- as(Pt, "dgCMatrix")
 			SIGMA_G <- if (model == "tsrm") matrix(0, 0, 0) else SIGMA_G
 			SIGMA_P <- as(SIGMA_P, "dgCMatrix")
 			SIGMA_D <- as(SIGMA_D, "dgCMatrix")
@@ -124,7 +132,9 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			#- compute ...
 			tmp_grad <- gradient_singlegroup_sparse_export( parm_list=parm_list, 
 				ty=as.matrix(y[idx1:idx2]), tX=as.matrix(X[idx1:idx2,]), 
-				tZg=Zg_ng, tZp=tZp, tZd=tZd, tZt=Zt_ng, Pp=Pp, Pd=Pd, Pt=Pt,
+				tZg=Zg_ng, tZp=tZp, tZd=tZd, tZt=Zt_ng, 
+				Pp=Pp, Pd=Pd, Pt=Pt,
+				perm_p=as.integer(perm_p-1L), perm_d=as.integer(perm_d-1L), perm_t=as.integer(perm_t-1L),
 				SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T,
 				BETA=as.vector(BETA_ng), np=np, nd=nd, nt=nt, parm_mat=parm_mat, 
 				with_reml=args_list$with_reml, model=model )
@@ -135,7 +145,8 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 				parm_list=parm_list, parm_table=parm_table_ng, 
 				np=np, nd=nd, nt=nt, 
 				y=y[idx1:idx2], X=X[idx1:idx2,],
-				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng, Pp=Pp, Pd=Pd, Pt=Pt,
+				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng, 
+				perm_p=perm_p, perm_d=perm_d, perm_t=perm_t,
 				BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
 				args_list=args_list, sigma_derivatives=sigma_derivatives )
 

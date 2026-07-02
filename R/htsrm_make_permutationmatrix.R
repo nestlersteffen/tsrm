@@ -21,7 +21,7 @@ htsrm_make_permutationmatrix <- function( n_units=NULL, block_size=NULL, nv=NULL
 	cs_var    <- c( 0, cumsum( n_units * block_size ) )  # offset of the variable block (var-major)
 
 	#- make vector with entries for permutation matrix:
-	perm <- integer( n_total )
+	perm <- perm_inv <- integer( n_total )
 	for ( u in 1:n_units ) {
 		for ( v in 1:nv ) {
 			s_v <- block_size[v]
@@ -29,11 +29,12 @@ htsrm_make_permutationmatrix <- function( n_units=NULL, block_size=NULL, nv=NULL
 			for ( b in 1:s_v ) {
 				from <- (u-1)*S + cs_within[v] + b                # "Einheit-zuerst" (unit-major)
 				to   <- cs_var[v] + (u-1)*s_v + b                 # "Variable-zuerst" (var-major)
-				perm[to] <- from
+				perm[to]       <- from
+				perm_inv[from] <- to
 			}
 		}
 	}
 	P <- matrix( 0, n_total, n_total )
 	for ( j in 1:n_total ) P[j, perm[j]] <- 1
-	return( P )
+	return( list( perm = perm, perm_inv = perm_inv, P = P ) )
 }

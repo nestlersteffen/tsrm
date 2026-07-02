@@ -9,8 +9,10 @@
 #include <unsupported/Eigen/KroneckerProduct>
 #include "derivatives.h"
 #include "dmvnorm.h"
+// #include <chrono>
 
 typedef Eigen::SparseMatrix<double> SpMat;
+// typedef Eigen::PermutationMatrix<Eigen::Dynamic> PermMat;
 
 Eigen::MatrixXd compute_V_rcpp(
     const Eigen::MatrixXd& tZg,
@@ -74,9 +76,12 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     const Eigen::SparseMatrix<double>& tZp,  
     const Eigen::SparseMatrix<double>& tZd,  
     const Eigen::SparseMatrix<double>& tZt,
-    const Eigen::SparseMatrix<double>& Pp, 
-    const Eigen::SparseMatrix<double>& Pd,
-    const Eigen::SparseMatrix<double>& Pt,
+    const Eigen::MatrixXd& Pp, 
+    const Eigen::MatrixXd& Pd,
+    const Eigen::MatrixXd& Pt,
+    const Eigen::VectorXi& perm_p, 
+    const Eigen::VectorXi& perm_d,
+    const Eigen::VectorXi& perm_t,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,

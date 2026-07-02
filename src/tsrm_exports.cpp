@@ -55,6 +55,9 @@ Eigen::VectorXd gradient_singlegroup_export(
     const Eigen::MatrixXi& parm_mat,
     bool with_reml, const std::string& model )
 {
+    
+    Eigen::setNbThreads(1);
+
     //-- get SD and RHO matrices from parm_list:
     Eigen::MatrixXd SD_P  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_P"]);
     Eigen::MatrixXd SD_D  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_D"]);
@@ -78,7 +81,8 @@ Eigen::VectorXd gradient_singlegroup_export(
     return gradient_singlegroup_rcpp(
         SD_G, SD_P, SD_D, SD_T,
         RHO_G, RHO_P, RHO_D, RHO_T,
-        ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt,
+        ty, tX, tZg, tZp, tZd, tZt, 
+        Pp, Pd, Pt,
         SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
         BETA, np, nd, nt,
         parm_mat, with_reml, model );
@@ -93,9 +97,12 @@ Eigen::VectorXd gradient_singlegroup_sparse_export(
     const Eigen::SparseMatrix<double>& tZp,
     const Eigen::SparseMatrix<double>& tZd,
     const Eigen::SparseMatrix<double>& tZt,
-    const Eigen::SparseMatrix<double>& Pp, 
-    const Eigen::SparseMatrix<double>& Pd,
-    const Eigen::SparseMatrix<double>& Pt,
+    const Eigen::MatrixXd& Pp, 
+    const Eigen::MatrixXd& Pd,
+    const Eigen::MatrixXd& Pt,
+    const Eigen::VectorXi& perm_p, 
+    const Eigen::VectorXi& perm_d,
+    const Eigen::VectorXi& perm_t,
     const Eigen::MatrixXd& SIGMA_G,
     const Eigen::SparseMatrix<double>& SIGMA_P,
     const Eigen::SparseMatrix<double>& SIGMA_D,
@@ -106,6 +113,7 @@ Eigen::VectorXd gradient_singlegroup_sparse_export(
     bool with_reml,
     const std::string& model )
 {
+    
     Eigen::MatrixXd SD_P  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_P"]);
     Eigen::MatrixXd SD_D  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_D"]);
     Eigen::MatrixXd RHO_P = Rcpp::as<Eigen::MatrixXd>(parm_list["RHO_P"]);
@@ -127,7 +135,9 @@ Eigen::VectorXd gradient_singlegroup_sparse_export(
     return gradient_singlegroup_sparse_rcpp(
         SD_G, SD_P, SD_D, SD_T,
         RHO_G, RHO_P, RHO_D, RHO_T,
-        ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt,
+        ty, tX, tZg, tZp, tZd, tZt, 
+        Pp, Pd, Pt,
+        perm_p, perm_d, perm_t,
         SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
         BETA, np, nd, nt,
         parm_mat, with_reml, model );
