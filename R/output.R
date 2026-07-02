@@ -1,13 +1,15 @@
 
 #---- functions to print the results 
 
-print_optinfos <- function( object=NULL, digits=3L, model=c("srm","tsrm") )
+print_optinfos <- function( object=NULL, digits=3L, model=c("srm","tsrm","htsrm") )
 {
   #- adapt model_text:
   if ( model == "srm") {
     model_text <- "Social relations model fit with "
-  } else {
+  } else if (model == "tsrm") {
     model_text <- "Triadic social relations model fit with "
+  } else if (model == "htsrm" ) {
+    model_text <- "Hybrid triadic social relations model fit with "
   }
   #- define the texts:
   if ( object$args_list$with_reml ) {
@@ -213,7 +215,7 @@ tsrm_print_parameters <- function( object=NULL, digits=3L )
     }
     tmpTab <- data.frame( Name = tmpNames, Variance = format( VAR_T, nsmall = digits), 
         Std.Dev. = format( SD_T, nsmall = digits), Corr = RHO_T, stringsAsFactors = FALSE )
-    colnames(tmpTab) <- c("Name", "Variance", "Std.Dev.", "Corr.", rep("", ncol(RHO_D)-1))
+    colnames(tmpTab) <- c("Name", "Variance", "Std.Dev.", "Corr.", rep("", ncol(RHO_T)-1))
     cat( paste0( "Random effects triad-level: " , "\n" ) )
     print( tmpTab, row.names = FALSE )
     cat("\n")
@@ -249,6 +251,90 @@ tsrm_print_parameters <- function( object=NULL, digits=3L )
   
 }
 
+#- this function prints the tsrm function parameters
+
+htsrm_print_parameters <- function( object=NULL, digits=3L )
+{
+  
+    #- get parmtable from object:
+    parm_table <- object$parm_table
+      
+    #- we round the values in the table:
+    parm_table[,c("est","se","z","p")] <- round( parm_table[,c("est","se","z","p")], digits )
+
+    #- ------------------------------------------
+    #-    Standard deviations and correlations
+    #- ------------------------------------------
+  
+    #- person effects:
+    SD_P  <- round( diag( object$parm_list$SD_P ), digits )
+    VAR_P <- round( diag( object$parm_list$SD_P )^2, digits )
+    RHO_P <- matrix("",nrow=5,ncol=5-1)
+    for(i in 2:nrow(RHO_P)) {
+        for(j in 1:(i-1)) {
+          RHO_P[i, j] <- format( round( object$parm_list$RHO_P[i,j], digits ), nsmall = digits)
+        }
+    }
+    tmpNames <- c( "T_Perc.", "T_Targ.", "T_Judg.", "D_Perc.", "D_Targ." )
+    tmpTab <- data.frame( Name = tmpNames, Variance = format( VAR_P, nsmall = digits), 
+        Std.Dev. = format( SD_P, nsmall = digits), Corr = RHO_P, stringsAsFactors = FALSE )
+    colnames(tmpTab) <- c("Name", "Variance", "Std.Dev.", "Corr.", rep("", ncol(RHO_P)-1))
+    cat( paste0( "Random effects person-level: " , "\n" ) )
+    print( tmpTab, row.names = FALSE )
+    cat("\n")
+
+    #- dyadic effects:
+    SD_D  <- round( diag( object$parm_list$SD_D ), digits )
+    VAR_D <- round( diag( object$parm_list$SD_D )^2, digits )
+    RHO_D <- matrix("",nrow=8,ncol=8-1)
+    for(i in 2:nrow(RHO_D)) {
+        for(j in 1:(i-1)) {
+          RHO_D[i, j] <- format( round( object$parm_list$RHO_D[i,j], digits ), nsmall = digits)
+        }
+    }
+    tmpNames <- c( "AB_ij", "AB_ji", "AC_ij", "AC_ji", "BC_ij", "BC_ji", "r_ij", "r_ji" )
+    tmpTab <- data.frame( Name = tmpNames, Variance = format( VAR_D, nsmall = digits), 
+        Std.Dev. = format( SD_D, nsmall = digits), Corr = RHO_D, stringsAsFactors = FALSE )
+    colnames(tmpTab) <- c("Name", "Variance", "Std.Dev.", "Corr.", rep("", ncol(RHO_D)-1))
+    cat( paste0( "Random effects dyad-level: " , "\n" ) )
+    print( tmpTab, row.names = FALSE )
+    cat("\n")
+
+    #- triadic effects:
+    SD_T  <- round( diag( object$parm_list$SD_T ), digits )
+    VAR_T <- round( diag( object$parm_list$SD_T )^2, digits )
+    RHO_T <- matrix("",nrow=6,ncol=6-1)
+    for(i in 2:nrow(RHO_T)) {
+        for(j in 1:(i-1)) {
+          RHO_T[i, j] <- format( round( object$parm_list$RHO_T[i,j], digits ), nsmall = digits)
+        }
+    }
+    tmpNames <- c( "ABC_ijk", "ABC_jik", "ABC_ikj", "ABC_kij", "ABC_jki", "ABC_kji" )
+    tmpTab <- data.frame( Name = tmpNames, Variance = format( VAR_T, nsmall = digits), 
+        Std.Dev. = format( SD_T, nsmall = digits), Corr = RHO_T, stringsAsFactors = FALSE )
+    colnames(tmpTab) <- c("Name", "Variance", "Std.Dev.", "Corr.", rep("", ncol(RHO_T)-1))
+    cat( paste0( "Random effects triad-level: " , "\n" ) )
+    print( tmpTab, row.names = FALSE )
+    cat("\n")
+
+    #- ----------------------------
+    #-   fixed effects
+    #- ----------------------------
+  
+    idx <- which( parm_table$type == "BETA" )
+    tmpNames <- do.call("c",object$names_list$mu_preds[1])
+    tmpTab <- data.frame( Name = tmpNames, 
+            Value = format( parm_table$est[idx], nsmall = digits),
+            Std.Error = format( parm_table$se[idx], nsmall = digits),
+            z_value = format( parm_table$z[idx], nsmall = digits),
+            p_value = format( parm_table$p[idx], nsmall = digits) )
+    colnames(tmpTab) <- c("", "Value", "Std.Error", "z-value", "p-value")
+    cat( paste0( "Fixed effects: ", "\n" ) )
+    print( tmpTab, row.names = FALSE )
+    cat("\n")
+  
+}
+
 output <- function( object = NULL, digits = 3L )
 {
     #- get model
@@ -256,7 +342,8 @@ output <- function( object = NULL, digits = 3L )
     print_parameters <- switch( model,
         "srm"  = srm_print_parameters,
         "tsrm" = tsrm_print_parameters,
-        stop( paste( "The srm or the tsrm can be estimated." ) )
+        "htsrm" = htsrm_print_parameters,
+        stop( paste( "Only the srm, the tsrm, and the hybrid tsrm can be estimated." ) )
     )
     #- print general information:
     print_optinfos( object=object, digits=digits, model=model )
