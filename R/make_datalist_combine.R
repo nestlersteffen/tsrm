@@ -64,13 +64,15 @@ make_datalist_combine <- function( data_list_groups=NULL, no_var=NULL, model=NUL
 	nv <- no_var
 
 	#- get the permutation matrix:
-	Pp <- make_permutationmatrix( n_units=np, block_size=psize, nv=nv )
-	Pd <- make_permutationmatrix( n_units=nd, block_size=dsize, nv=nv )
-	Pt <- make_permutationmatrix( n_units=nt, block_size=dsize, nv=nv )
+	tmp_p <- make_permutationmatrix( n_units=np, block_size=psize, nv=nv )
+	tmp_d <- make_permutationmatrix( n_units=nd, block_size=dsize, nv=nv )
+	tmp_t <- make_permutationmatrix( n_units=nt, block_size=dsize, nv=nv )
 
 	#- output:
 	data_list <- list( y=y, X=X, Zg=Zg, Zp=Zp, Zd=Zd, Zt=Zt, groupinfo=groupinfo, 
-		np=np, nd=nd, nt=nt, nv=nv, Pp=Pp, Pd=Pd, Pt=Pt )
+		np=np, nd=nd, nt=nt, nv=nv, # Pp=Pp, Pd=Pd, Pt=Pt )
+		Pp=tmp_p$P, Pd=tmp_d$P, Pt=tmp_t$P,
+		perm_p=tmp_p$perm, perm_d=tmp_d$perm, perm_t=tmp_t$perm )
 	return( data_list )
 
 }

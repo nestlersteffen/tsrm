@@ -48,12 +48,9 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	Pp <- data_list[["Pp"]]
 	Pd <- data_list[["Pd"]]
 	Pt <- data_list[["Pt"]]
-	perm_p 	   <- data_list[["perm_p"]]
-	perm_d 	   <- data_list[["perm_d"]]
-	perm_t 	   <- data_list[["perm_t"]]
-	perm_inv_p <- data_list[["perm_inv_p"]]
-	perm_inv_d <- data_list[["perm_inv_d"]]
-	perm_inv_t <- data_list[["perm_inv_t"]]
+	perm_p <- data_list[["perm_p"]]
+	perm_d <- data_list[["perm_d"]]
+	perm_t <- data_list[["perm_t"]]
 	
 	#- make the matrices "big":
 	SIGMA_P <- diag(1,np) %x% SIGMA_P

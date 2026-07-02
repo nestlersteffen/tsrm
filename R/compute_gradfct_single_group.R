@@ -4,7 +4,6 @@
 compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL, 
 	np=NULL, nd=NULL, nt=NULL, 
 	y=NULL, X=NULL, Zg=NULL, Zp=NULL, Zd=NULL, Zt=NULL, 
-	#Pp=NULL, Pd=NULL, Pt=NULL,
 	perm_p=NULL, perm_d=NULL, perm_t=NULL,
 	BETA=NULL, SIGMA_G=NULL, SIGMA_P=NULL, SIGMA_D=NULL, SIGMA_T=NULL, 
 	args_list=FALSE, sigma_derivatives=NULL )
