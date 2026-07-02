@@ -2,6 +2,7 @@
 get_ses_beta_singlegroup <- function( parm_list=NULL, parm_table_covs=NULL, 
 	np=NULL, nd=NULL, nt=NULL, 
 	X=NULL, Zg=NULL, Zp=NULL, Zd=NULL, Zt=NULL, 
+	perm_p=NULL, perm_d=NULL, perm_t=NULL,
 	SIGMA_G=NULL, SIGMA_P=NULL, SIGMA_D=NULL, SIGMA_T=NULL, 
 	args_list=FALSE, sigma_derivatives=NULL )
 {
@@ -29,6 +30,12 @@ get_ses_beta_singlegroup <- function( parm_list=NULL, parm_table_covs=NULL,
   		NOP 	 <- nrow( parm_table_covs ) 
   		out      <- array( 0, dim = c( ncol( A ), nrow(A), NP + 1 ) )
   		out[,,1] <- A
+
+  		#- we pre-compute some things:
+  		if (ncol(Zg) > 0) { BZg <- crossprod(B,Zg) }
+  		BZp <- crossprod(B,Zp)
+  		BZd <- crossprod(B,Zd)
+  		if (ncol(Zt) > 0) { BZt <- crossprod(B,Zt) }
   	
   	  	for ( nn in 1:NOP ) {
   
@@ -45,20 +52,24 @@ get_ses_beta_singlegroup <- function( parm_list=NULL, parm_table_covs=NULL,
 		    #- compute derivative of V depending on matrix:
 		    if ( type %in% c("SD_P","RHO_P") ) { # c("SIGMA_P")
 		    	tmp <- diag(1, np ) %x% sigma_derive
-		    	Z   <- Zp
+		    	tmp <- tmp[perm_p, perm_p]
+		    	pre <- BZp
 		    } else if ( type %in% c("SD_D","RHO_D") ) { # c("SIGMA_D")
 		    	tmp <- diag(1, nd ) %x% sigma_derive
-		    	Z   <- Zd
+		    	tmp <- tmp[perm_d, perm_d]
+		    	pre <- BZd
 		    } else if ( type %in% c("SD_T","RHO_T") ) {  
 		    	tmp <- diag(1, nt ) %x% sigma_derive
-		    	Z   <- Zt
+		    	tmp <- tmp[perm_t, perm_t]
+		    	pre <- BZt
 		    } else if ( type %in% c("SD_G", "RHO_G") ) {
                 tmp <- sigma_derive                   
-                Z   <- Zg
+                pre <- BZg
             }
 
-		    V_DERIVE <- Z%*%tmp%*%t(Z)
-		    out[,,nn+1] <- crossprod( B, V_DERIVE )%*%B
+		    # V_DERIVE <- Z%*%tmp%*%t(Z)
+		    # out[,,nn+1] <- crossprod( B, V_DERIVE )%*%B
+		    out[,,nn+1] <- tcrossprod( pre%*%tmp, pre )
 		}
 
 	} else if ( args_list$type_ses == "Standard" ) { 
@@ -72,7 +83,7 @@ get_ses_beta_singlegroup <- function( parm_list=NULL, parm_table_covs=NULL,
 #- function to compute standard errors for the variables:
 
 get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL, data_list=NULL, 
-	args_list=NULL, model=c("srm","tsrm") )  
+	args_list=NULL, model=c("srm","tsrm","htsrm") )  
 {
 
 	#- get model-specific functions.
@@ -80,9 +91,14 @@ get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL, data_list=NULL,
 	if ( model == "srm" ) {
 		include_free_parms <- srm_include_free_parameters
         sigma_derivatives  <- srm_sigma_derivatives
-	} else {
+	} else if ( model == "tsrm" ) {
 		include_free_parms <- tsrm_include_free_parameters
-        sigma_derivatives  <- tsrm_sigma_derivatives
+		sigma_derivatives  <- tsrm_sigma_derivatives
+	} else if ( model == "htsrm" ) {
+		include_free_parms <- htsrm_include_free_parameters
+		sigma_derivatives  <- htsrm_sigma_derivatives
+	} else {
+		stop("False model class defined (gradfct).")
 	}
 
 	#- insert parm
@@ -118,16 +134,29 @@ get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL, data_list=NULL,
 	nd <- data_list[["nd"]]
 	nt <- data_list[["nt"]]
 	nv <- data_list[["nv"]]
+	perm_p <- data_list[["perm_p"]]
+	perm_d <- data_list[["perm_d"]]
+	perm_t <- data_list[["perm_t"]]
 	
 	#- compute covariance matrices:
-	parm_list <- get_sigmas( parm_list=parm_list, model=model  )
+	parm_list <- get_sigmas( parm_list=parm_list )
 
-	#- get entries in parm_table and make them full matrices:
-	BETA    <- parm_list[["BETA"]]
+	#- get entries in parm_table:
+	BETA 	<- parm_list[["BETA"]]
 	SIGMA_G <- parm_list[["SIGMA_G"]]
-	SIGMA_P <- parm_list[["SIGMA_P"]] %x% diag(1,np )
-	SIGMA_D <- parm_list[["SIGMA_D"]] %x% diag(1,nd )
-	SIGMA_T <- if ( ncol(Zt) > 0 ) diag(1, nt) %x% parm_list[["SIGMA_T"]] else parm_list[["SIGMA_T"]]
+	SIGMA_P <- parm_list[["SIGMA_P"]]
+	SIGMA_D <- parm_list[["SIGMA_D"]]
+	SIGMA_T <- parm_list[["SIGMA_T"]]
+
+ 	#- make them big matrices:
+	SIGMA_P <- diag(1,np) %x% SIGMA_P
+	SIGMA_P <- SIGMA_P[perm_p,perm_p] # faster than: Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
+	SIGMA_D <- diag(1,nd) %x% SIGMA_D
+	SIGMA_D <- SIGMA_D[perm_d,perm_d]
+	if ( ncol(Zt) > 0 ) {
+		SIGMA_T <- diag(1, nt) %x% parm_list[["SIGMA_T"]] 
+		SIGMA_T <- SIGMA_T[perm_t,perm_t]
+	} 
 
 	#- get no. groups:
 	ngroups <- nrow( groupinfo )
@@ -148,6 +177,7 @@ get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL, data_list=NULL,
 		result[[ ng ]] <- get_ses_beta_singlegroup( parm_list=parm_list,
 			parm_table_covs=parm_table_covs,np=np, nd=nd, nt=nt, X=X[idx1:idx2,], 
 			Zg=Zg_ng, Zp=Zp[idx1:idx2,], Zd=Zd[idx1:idx2,], Zt=Zt_ng,
+			perm_p=perm_p, perm_d=perm_d, perm_t=perm_t,
 			SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
 			args_list=args_list, sigma_derivatives=sigma_derivatives )
 	}
