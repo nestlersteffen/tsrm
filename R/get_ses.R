@@ -69,7 +69,7 @@ get_ses_beta_singlegroup <- function( parm_list=NULL, parm_table_covs=NULL,
 
 		    # V_DERIVE <- Z%*%tmp%*%t(Z)
 		    # out[,,nn+1] <- crossprod( B, V_DERIVE )%*%B
-		    out[,,nn+1] <- tcrossprod( pre%*%tmp, pre )
+		    out[,,index_nn+1] <- out[,,index_nn+1] + tcrossprod( pre%*%tmp, pre )
 		}
 
 	} else if ( args_list$type_ses == "Standard" ) { 
@@ -98,7 +98,7 @@ get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL, data_list=NULL,
 		include_free_parms <- htsrm_include_free_parameters
 		sigma_derivatives  <- htsrm_sigma_derivatives
 	} else {
-		stop("False model class defined (gradfct).")
+		stop("False model class defined (get_ses).")
 	}
 
 	#- insert parm
@@ -112,11 +112,13 @@ get_ses <- function( parm=NULL, parm_table=NULL, parm_list=NULL, data_list=NULL,
 	parm_table_covs$index <- parm_table_covs$index - max( parm_table_beta$index )
 
 	#- compute standard errors for variance and covariance parms:
-	hessian_covs <- nloptr::nl.jacobian( x0=parm[-idx], fn=compute_gradfct, 
-	    parm_list=parm_list, parm_table=parm_table_covs, data_list=data_list, 
-		args_list=args_list, model=model, both=FALSE )
-	vcov_covs 			<- base::solve( hessian_covs ) 
-	ses_covs  			<- suppressWarnings( sqrt( diag( vcov_covs ) ) )
+	hessian_full <- numDeriv::jacobian( x=parm, func=compute_gradfct, 
+	    parm_list=parm_list, parm_table=parm_table, data_list=data_list, 
+		args_list=args_list, model=model, both=FALSE, method = "Richardson" )
+	vcov_full <- base::solve( hessian_full )
+	vcov_covs <- vcov_full[-idx, -idx, drop=FALSE]
+
+	ses_covs  <- suppressWarnings( sqrt( diag( vcov_covs ) ) )
 	parm_table_covs$est <- parm[-idx]
 	parm_table_covs$se  <- ses_covs
 	parm_table_covs$z   <- with( parm_table_covs, est/se )   
