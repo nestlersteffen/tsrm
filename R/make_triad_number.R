@@ -37,13 +37,23 @@ make_triad_number <- function( data=NULL, p_var=NULL, g_var=NULL, maxg=1e2 )
             config <- c(judge, actor, partner)
             
             # Vergleiche mit allen 6 möglichen Permutationen der sortierten Triade:
+            # perms <- rbind(
+            #     c(three_persons[1], three_persons[2], three_persons[3]),  # Typ 1
+            #     c(three_persons[1], three_persons[3], three_persons[2]),  # Typ 2
+            #     c(three_persons[2], three_persons[1], three_persons[3]),  # Typ 3
+            #     c(three_persons[2], three_persons[3], three_persons[1]),  # Typ 4
+            #     c(three_persons[3], three_persons[1], three_persons[2]),  # Typ 5
+            #     c(three_persons[3], three_persons[2], three_persons[1])   # Typ 6
+            # )
+            # perms <- perms[!duplicated(perms), ]
+
             perms <- rbind(
-                c(three_persons[1], three_persons[2], three_persons[3]),  # Typ 1
-                c(three_persons[1], three_persons[3], three_persons[2]),  # Typ 2
-                c(three_persons[2], three_persons[1], three_persons[3]),  # Typ 3
-                c(three_persons[2], three_persons[3], three_persons[1]),  # Typ 4
-                c(three_persons[3], three_persons[1], three_persons[2]),  # Typ 5
-                c(three_persons[3], three_persons[2], three_persons[1])   # Typ 6
+                c(three_persons[3], three_persons[1], three_persons[2]),  # Typ 1 = ijk
+                c(three_persons[3], three_persons[2], three_persons[1]),  # Typ 2 = jik
+                c(three_persons[2], three_persons[1], three_persons[3]),  # Typ 3 = ikj
+                c(three_persons[2], three_persons[3], three_persons[1]),  # Typ 4 = kij
+                c(three_persons[1], three_persons[2], three_persons[3]),  # Typ 5 = jki
+                c(three_persons[1], three_persons[3], three_persons[2])   # Typ 6 = kji
             )
             perms <- perms[!duplicated(perms), ]
             

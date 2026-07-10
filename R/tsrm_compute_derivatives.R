@@ -162,15 +162,23 @@ tsrm_sigma_derivatives <- function( parm_list = NULL, type = NULL, pos = NULL )
             ONE_ij[6,11] <- ONE_ij[11,6] <- 1
         }
         if ( pos[1] == 1 & pos[2] == 10 ) {
-            ONE_ij[1,10] <- ONE_ij[10,1]  <- 1
-            ONE_ij[2,9]  <- ONE_ij[9,2]  <- ONE_ij[3,12] <- ONE_ij[12,3] <- 1
-            ONE_ij[4,7]  <- ONE_ij[7,4]  <- ONE_ij[5,10] <- ONE_ij[10,5] <- 1
+            ONE_ij[1,10] <- ONE_ij[10,1] <- 1
+            # ONE_ij[2,9]  <- ONE_ij[9,2]  <- 1
+            ONE_ij[2,12] <- ONE_ij[12,2] <- 1
+            # ONE_ij[3,12] <- ONE_ij[12,3] <- 1
+            ONE_ij[4,11] <- ONE_ij[11,4] <- 1
+            ONE_ij[4,7]  <- ONE_ij[7,4]  <- 1
+            ONE_ij[5,10] <- ONE_ij[10,5] <- 1
             ONE_ij[6,8]  <- ONE_ij[8,6]  <- 1
         }
         if ( pos[1] == 1 & pos[2] == 11 ) {
-            ONE_ij[1,11]  <- ONE_ij[11,1]  <- 1
-            ONE_ij[2,12] <- ONE_ij[12,2] <- ONE_ij[3,8]  <- ONE_ij[8,3]  <- 1
-            ONE_ij[4,11] <- ONE_ij[11,4] <- ONE_ij[5,7]  <- ONE_ij[7,5]  <- 1
+            ONE_ij[1,11] <- ONE_ij[11,1] <- 1
+            #ONE_ij[2,12] <- ONE_ij[12,2] <- 1
+            ONE_ij[2,9]  <- ONE_ij[9,2]  <- 1
+            ONE_ij[3,8]  <- ONE_ij[8,3]  <- 1
+            # ONE_ij[4,11] <- ONE_ij[11,4] <- 1
+            ONE_ij[3,12] <- ONE_ij[12,3] <- 1
+            ONE_ij[5,7]  <- ONE_ij[7,5]  <- 1
             ONE_ij[6,9]  <- ONE_ij[9,6]  <- 1
         }
         res <- t( SD_T ) %*% ONE_ij %*% SD_T                

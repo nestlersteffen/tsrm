@@ -101,34 +101,50 @@ tsrm_include_free_parameters <- function( parm=NULL, parm_list=NULL, parm_table=
             }
             #- cross-covariance
             if ( ( pos[1] == 1 & pos[2] == 7 ) ) { # 28
-                x_nn[2,8]  <- x_nn[8,2] <- x_nn[3,9] <- x_nn[9,3] <- parm[ index_nn ]
-                x_nn[4,10] <- x_nn[10,4] <- x_nn[5,11] <- x_nn[11,5] <- parm[ index_nn ]
+                x_nn[2,8]  <- x_nn[8,2]  <- parm[ index_nn ]
+                x_nn[3,9]  <- x_nn[9,3]  <- parm[ index_nn ]
+                x_nn[4,10] <- x_nn[10,4] <- parm[ index_nn ]
+                x_nn[5,11] <- x_nn[11,5] <- parm[ index_nn ]
                 x_nn[6,12] <- x_nn[12,6] <- parm[ index_nn ]
             }
             if ( ( pos[1] == 1 & pos[2] == 9 ) ) { # 29
-                x_nn[2,11] <- x_nn[11,2] <- x_nn[3,7] <- x_nn[7,3]  <- parm[ index_nn ]
-                x_nn[4,12] <- x_nn[12,4] <- x_nn[5,8] <- x_nn[8,5] <- parm[ index_nn ]
+                x_nn[2,11] <- x_nn[11,2] <- parm[ index_nn ]
+                x_nn[3,7]  <- x_nn[7,3]  <- parm[ index_nn ]
+                x_nn[4,12] <- x_nn[12,4] <- parm[ index_nn ]
+                x_nn[5,8]  <- x_nn[8,5]  <- parm[ index_nn ]
                 x_nn[6,10] <- x_nn[10,6] <- parm[ index_nn ]
             } 
             if ( ( pos[1] == 1 & pos[2] == 12 ) ) { # 30
-                x_nn[2,10] <- x_nn[10,2] <- x_nn[3,11] <- x_nn[11,3]  <- parm[ index_nn ]
-                x_nn[4,8] <- x_nn[8,4] <- x_nn[5,9] <- x_nn[9,5] <- parm[ index_nn ]
-                x_nn[6,7] <- x_nn[7,6] <- parm[ index_nn ]
+                x_nn[2,10] <- x_nn[10,2] <- parm[ index_nn ]
+                x_nn[3,11] <- x_nn[11,3] <- parm[ index_nn ]
+                x_nn[4,8]  <- x_nn[8,4]  <- parm[ index_nn ]
+                x_nn[5,9]  <- x_nn[9,5]  <- parm[ index_nn ]
+                x_nn[6,7]  <- x_nn[7,6]  <- parm[ index_nn ]
             } 
             if ( ( pos[1] == 1 & pos[2] == 8 ) ) { # 31
-                x_nn[2,7] <- x_nn[7,2] <- x_nn[3,10] <- x_nn[10,3]  <- parm[ index_nn ]
-                x_nn[4,9] <- x_nn[9,4] <- x_nn[5,12] <- x_nn[12,5] <- parm[ index_nn ]
+                x_nn[2,7]  <- x_nn[7,2]  <- parm[ index_nn ]
+                x_nn[3,10] <- x_nn[10,3] <- parm[ index_nn ]
+                x_nn[4,9]  <- x_nn[9,4]  <- parm[ index_nn ]
+                x_nn[5,12] <- x_nn[12,5] <- parm[ index_nn ]
                 x_nn[6,11] <- x_nn[11,6] <- parm[ index_nn ]
             }
             if ( ( pos[1] == 1 & pos[2] == 10 ) ) { # 32
-                x_nn[2,9] <- x_nn[9,2] <- x_nn[3,12] <- x_nn[12,3]  <- parm[ index_nn ]
-                x_nn[4,7] <- x_nn[7,4] <- x_nn[5,10] <- x_nn[10,5] <- parm[ index_nn ]
-                x_nn[6,8] <- x_nn[8,6] <- parm[ index_nn ]
+                x_nn[2,12] <- x_nn[12,2] <- parm[ index_nn ]
+                # x_nn[2,9]  <- x_nn[9,2]  <- parm[ index_nn ]
+                x_nn[4,11] <- x_nn[11,4] <- parm[ index_nn ]
+                # x_nn[3,12] <- x_nn[12,3] <- parm[ index_nn ]
+                x_nn[4,7]  <- x_nn[7,4]  <- parm[ index_nn ]
+                x_nn[5,10] <- x_nn[10,5] <- parm[ index_nn ]
+                x_nn[6,8]  <- x_nn[8,6]  <- parm[ index_nn ]
             }
             if ( ( pos[1] == 1 & pos[2] == 11 ) ) { # 33
-                x_nn[2,12] <- x_nn[12,2] <- x_nn[3,8] <- x_nn[8,3]  <- parm[ index_nn ]
-                x_nn[4,11] <- x_nn[11,4] <- x_nn[5,7] <- x_nn[7,5] <- parm[ index_nn ]
-                x_nn[6,9] <- x_nn[9,6] <- parm[ index_nn ]
+                #x_nn[2,12] <- x_nn[12,2] <- parm[ index_nn ]
+                x_nn[2,9]  <- x_nn[9,2]  <- parm[ index_nn ]
+                x_nn[3,8]  <- x_nn[8,3]  <- parm[ index_nn ]
+                #x_nn[4,11] <- x_nn[11,4] <- parm[ index_nn ]
+                x_nn[3,12] <- x_nn[12,3] <- parm[ index_nn ]
+                x_nn[5,7]  <- x_nn[7,5]  <- parm[ index_nn ]
+                x_nn[6,9]  <- x_nn[9,6]  <- parm[ index_nn ]
             }
            
         }
