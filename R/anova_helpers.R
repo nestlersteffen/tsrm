@@ -100,3 +100,105 @@ tsrm_anova_buildS <- function(N=NULL)
 	return(C_triad)
   
 }
+
+#- --- function to build the S matrix used to compute srm estimates (this is already the inverse )
+
+srm_anova_buildS <- function(N=NULL)
+{
+  	#- creating empty matrix
+  	C_dyad <- matrix(0, nrow=6, ncol=6)
+  
+  	#- filling in matrix
+	C_dyad[1, 1] <- 1
+	C_dyad[1, 2] <- 1 / (N - 2)
+	C_dyad[1, 3] <- -1 / (N - 1)
+	C_dyad[1, 4] <- 1 / (N - 2)
+	C_dyad[1, 5] <- 1 / (N - 2)
+	C_dyad[1, 6] <- -1 / ((N - 1) * (N - 2))
+	  
+	C_dyad[2, 1] <- C_dyad[1, 2]
+	C_dyad[2, 2] <- C_dyad[1, 1]
+	for (i in 3:6) {
+		C_dyad[2, i] <- C_dyad[1, i]
+	}
+	  
+	C_dyad[3, 1] <- -1
+	C_dyad[3, 2] <- -1
+	C_dyad[3, 3] <- ((N - 1) * (N - 2) - 1) / ((N - 1) * (N - 2))
+	C_dyad[3, 4] <- -1 * C_dyad[1, 2]
+	C_dyad[3, 5] <- -1 * C_dyad[1, 2]
+	C_dyad[3, 6] <- -1 * C_dyad[1, 6]
+	  
+	C_dyad[4, 1] <- 1 / (N - 2)
+	C_dyad[4, 2] <- 1 / (N - 2)
+	C_dyad[4, 3] <- C_dyad[1, 6]
+	C_dyad[4, 4] <- 1
+	C_dyad[4, 5] <- 1 / (N - 2)
+	C_dyad[4, 6] <- -1 / (N - 1)
+	  
+	C_dyad[5, 1] <- C_dyad[4, 1]
+	C_dyad[5, 2] <- C_dyad[4, 2]
+	C_dyad[5, 3] <- C_dyad[4, 3]
+	C_dyad[5, 4] <- C_dyad[4, 5]
+	C_dyad[5, 5] <- C_dyad[4, 4]
+	C_dyad[5, 6] <- C_dyad[4, 6]
+	  
+	C_dyad[6, 1] <- -1 / (N - 2)
+	C_dyad[6, 2] <- -1 / (N - 2)
+	C_dyad[6, 3] <- 1 / ((N - 1) * (N - 2))
+	C_dyad[6, 4] <- -1
+	C_dyad[6, 5] <- -1
+	C_dyad[6, 6] <- C_dyad[3, 3]
+	  
+	#- scaling
+	for (i in 1:6) {
+	    for (j in 1:6) {
+			C_dyad[i, j] <- C_dyad[i, j] / (N * (N - 3))
+	    }
+	}
+  
+	return( C_dyad )
+  
+}
+
+#- --- function to build the S matrix used to compute htsrm cross-variable estimates
+
+htsrm_anova_build_crossS <- function(N=NULL)
+{
+  	cross_matrix <- matrix(c( 91, 92, 92, 92, 92, 92, 93, 94, 93, 94, 94, 94,
+                              92, 91, 92, 92, 92, 92, 94, 93, 94, 93, 94, 94,
+                              92, 92, 91, 92, 92, 92, 94, 93, 94, 94, 94, 93,
+                              92, 92, 92, 91, 92, 92, 93, 94, 94, 94, 93, 94,
+                              92, 92, 92, 92, 91, 92, 94, 94, 94, 93, 93, 94,
+                              92, 92, 92, 92, 92, 91, 94, 94, 93, 94, 94, 93,
+                              95, 96, 96, 95, 96, 96, 97, 98, 99, 98, 99, 98,
+                              96, 95, 95, 96, 96, 96, 98, 97, 98, 99, 98, 99,
+                              95, 96, 96, 96, 96, 95, 99, 98, 97, 98, 98, 99,
+                              96, 95, 96, 96, 95, 96, 98, 99, 98, 97, 99, 98,
+                              96, 96, 96, 95, 95, 96, 99, 98, 98, 99, 97, 98,
+                              96, 96, 95, 96, 96, 95, 98, 99, 99, 98, 98, 97),
+                              nrow=12, ncol=12)
+  	cross_matrix <- t(cross_matrix)
+
+	#- creating empty matrix
+	C_cross <- matrix(0, nrow = 12, ncol = 12)
+  
+	#- replacing values with corresponding terms
+	for (i in 1:12) {
+    	for (j in 1:12) {
+       		val <- cross_matrix[i, j]
+       		if (val == 91) C_cross[i, j] <- N - 1
+       		else if (val == 92) C_cross[i, j] <- (N - 1) / (N - 3)
+       		else if (val == 93) C_cross[i, j] <- -1 / ((N - 1) * (N - 2))
+       		else if (val == 94) C_cross[i, j] <- -1 / ((N - 1) * (N - 2) * (N - 3))
+       		else if (val == 95) C_cross[i, j] <- -1 * (N - 1)
+       		else if (val == 96) C_cross[i, j] <- -1 * ((N - 1) / (N - 3))
+       		else if (val == 97) C_cross[i, j] <- (N^2 - 5*N + 5) / ((N - 1) * (N - 2) * (N - 3))
+       		else if (val == 98) C_cross[i, j] <- 1 / ((N - 1) * (N - 2) * (N - 3))
+       		else if (val == 99) C_cross[i, j] <- 1 / ((N - 1) * (N - 2))
+            #- additional scaling
+      		C_cross[i, j] <- C_cross[i, j] / (N * (N - 4))
+    	}
+  	}  
+	return( C_cross )
+}

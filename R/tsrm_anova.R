@@ -46,13 +46,13 @@ tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL )
 		group_data[group_data[,t_type] == 1,t_var] ) - grand
 	abc_kji <- anova_means( group_data[group_data[,t_type] == 2,outcome], 
 		group_data[group_data[,t_type] == 2,t_var] ) - grand
-	abc_ikj <- anova_means( group_data[group_data[,t_type] == 3,outcome], 
+	abc_jik <- anova_means( group_data[group_data[,t_type] == 3,outcome], 
 		group_data[group_data[,t_type] == 3,t_var] ) - grand
-	abc_ijk <- anova_means( group_data[group_data[,t_type] == 4,outcome], 
+	abc_jki <- anova_means( group_data[group_data[,t_type] == 4,outcome], 
 		group_data[group_data[,t_type] == 4,t_var] ) - grand
-	abc_jki <- anova_means( group_data[group_data[,t_type] == 5,outcome], 
+	abc_ijk <- anova_means( group_data[group_data[,t_type] == 5,outcome], 
 		group_data[group_data[,t_type] == 5,t_var] ) - grand
-	abc_jik <- anova_means( group_data[group_data[,t_type] == 6,outcome], 
+	abc_ikj <- anova_means( group_data[group_data[,t_type] == 6,outcome], 
 		group_data[group_data[,t_type] == 6,t_var] ) - grand
 
 	#- ---------------------------------
@@ -132,52 +132,4 @@ tsrm_anova_pool <- function( parms=NULL, group_of_5=NULL, parm_table=NULL )
    	tab <- data.frame(Est=est, Std.Error=ses)
    	return( list( tab=tab, parm_mean=parm_mean, parm_ses=parm_ses ) )
 
-}
-
-tsrm_anova <- function( tsrm_data=NULL, names_list=NULL, parm_table=NULL, 
-	model=c("tsrm","htsrm"))
-{
-
-	#- get model-specific functions.
-	model <- match.arg( model )
-	if ( model == "srm" ) {
-	 	next
-	} else if ( model == "tsrm" ) {
-		anova_singlegroup <- tsrm_anova_singlegroup
-	} else if ( model == "htsrm" ) {
-		anova_singlegroup <- htsrm_anova_singlegroup
-	} else {
-		stop("False model class defined (tsrm_anova).")
-	}
-
-	#- get groupinfo matrix:
-
-	#- get names of relevant variables:
-	g_var   <- names_list$g_var
-	p_var   <- names_list$p_var
-	
-	#- get no. groups:
-	group_ids  <- unique( tsrm_data[,g_var] )
-	ngroups    <- length( group_ids )
-	parms      <- matrix( 0, nrow=ngroups, ncol=33)
-	group_of_5 <- rep(FALSE, ngroups)
-
-	#- compute group-specific parameter estimates:
-	for ( ng in seq( ngroups ) ) {
-			
-		#- get group-specific dataframe:
-		group_data <- tsrm_data[ tsrm_data[ ,g_var] == group_ids[ ng ], ]
-
-		#- check whether group contains five persons only
-		np <- length( unique( c( group_data[,p_var[1]], group_data[,p_var[2]], group_data[,p_var[3]] ) ) )
-		if ( np == 5 ) group_of_5[ng] <- TRUE
-
-		#- comoute parms:
-		parms[ng,] <- anova_singlegroup( group_data=group_data, np=np, names_list=names_list)
-
-   	}
-
-   	#- pool the group-specific estimates:
-   	result <- tsrm_anova_pool( parms=parms, group_of_5=group_of_5, parm_table=parm_table ) 
- 	return( result )
 }

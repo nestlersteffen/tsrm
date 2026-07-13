@@ -48,12 +48,12 @@ make_triad_number <- function( data=NULL, p_var=NULL, g_var=NULL, maxg=1e2 )
             # perms <- perms[!duplicated(perms), ]
 
             perms <- rbind(
-                c(three_persons[3], three_persons[1], three_persons[2]),  # Typ 1 = ijk
-                c(three_persons[3], three_persons[2], three_persons[1]),  # Typ 2 = jik
-                c(three_persons[2], three_persons[1], three_persons[3]),  # Typ 3 = ikj
-                c(three_persons[2], three_persons[3], three_persons[1]),  # Typ 4 = kij
-                c(three_persons[1], three_persons[2], three_persons[3]),  # Typ 5 = jki
-                c(three_persons[1], three_persons[3], three_persons[2])   # Typ 6 = kji
+                c(three_persons[3], three_persons[1], three_persons[2]),  # Typ 1 = ijk # kij
+                c(three_persons[3], three_persons[2], three_persons[1]),  # Typ 2 = jik # kji
+                c(three_persons[2], three_persons[1], three_persons[3]),  # Typ 3 = ikj # jik
+                c(three_persons[2], three_persons[3], three_persons[1]),  # Typ 4 = kij # jki
+                c(three_persons[1], three_persons[2], three_persons[3]),  # Typ 5 = jki # ijk
+                c(three_persons[1], three_persons[3], three_persons[2])   # Typ 6 = kji # ikj
             )
             perms <- perms[!duplicated(perms), ]
             
