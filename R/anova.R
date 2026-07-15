@@ -1,27 +1,23 @@
 
 
-anova <- function( data=NULL, names_list=NULL, parm_table=NULL, model=c("srm","tsrm","htsrm"))
+anova <- function( data=NULL, names_list=NULL, parm_table=NULL, with_ses=TRUE,
+	model=c("srm","tsrm","htsrm"))
 {
 
 	#- get model-specific functions.
 	model <- match.arg( model )
 	if ( model == "srm" ) {
 	 	anova_singlegroup <- srm_anova_singlegroup
-	 	anova_pool 		  <- srm_anova_pool
-	 	if ( names_list$no_var == 1 ) no_parms <- 6 else no_parms <- 18
+	 	if ( names_list$no_var == 1 ) no_parms <- 5 else no_parms <- 15
 	} else if ( model == "tsrm" ) {
 		anova_singlegroup <- tsrm_anova_singlegroup
-		anova_pool 		  <- tsrm_anova_pool
-		if ( names_list$no_var == 1 ) no_parms <- 33 else no_parms <- 79
+		if ( names_list$no_var == 1 ) no_parms <- 23 else no_parms <- 79
 	} else if ( model == "htsrm" ) {
 		anova_singlegroup <- htsrm_anova_singlegroup
-		anova_pool 		  <- htsrm_anova_pool
-		no_parms          <- 43
+		no_parms <- 40
 	} else {
 		stop("False model class defined (anova).")
 	}
-
-	#- get groupinfo matrix:
 
 	#- get names of relevant variables:
 	g_var   <- names_list$g_var
@@ -48,7 +44,22 @@ anova <- function( data=NULL, names_list=NULL, parm_table=NULL, model=c("srm","t
 
    	}
 
-   	#- pool the group-specific estimates:
-   	result <- anova_pool( parms=parms, group_of_5=group_of_5, parm_table=parm_table ) 
+   	#- get the average of the group-specific estimates:
+   	parm_mean <- colMeans( parms )
+   	if ( model != "srm" & any( group_of_5 ) ) {
+   		parm_mean[no_parms] <- colMeans( parms[-group_of_5,no_parms] )
+   	}
+
+   	#- compute the standard errors of the average estimates:
+   	parm_ses <- rep( NA, no_parms )
+   	if ( with_ses & ngroups > 1 ) {
+   		parm_ses <- apply( parms, 2, sd )/sqrt( ngroups )
+   		if ( model != "srm" & any( group_of_5 ) ) {
+   			parm_ses[no_parms] <- apply( parms[-group_of_5,no_parms], 2, sd )/sqrt( ngroups - no_group_of_5 )
+   		}
+   	}
+
+   	#- make output object:
+   	result <- data.frame(Est=parm_mean, Std.Error=parm_ses) 
  	return( result )
 }

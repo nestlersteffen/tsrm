@@ -1,5 +1,5 @@
 
-tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL ) 
+tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL, with_info=FALSE ) 
 {
 
 	#- get relevant variables
@@ -104,32 +104,19 @@ tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL )
 	
 	#- -------------------------------------------
 	#-  Step 3: get S and obtain final estimates
-	S    <- tsrm_anova_buildS( N=np )
-	invS <- base::solve(S)
+	S     <- tsrm_anova_buildS( N=np )
+	invS  <- base::solve(S)
+	gparm <- invS%*%sumsq
+	gparm <- gparm[c(1,2,3,10,11,12,28,4,5,7,13,14,15,16,19,23,22,17,25,31,30,29,32)]
 
-	return( invS%*%sumsq )
-
-}
-
-tsrm_anova_pool <- function( parms=NULL, group_of_5=NULL, parm_table=NULL ) 
-{
-	#- pool the results:
-	ngroups   <- nrow( parms)
-	parm_mean <- colMeans( parms )
-   	parm_ses  <- apply( parms, 2, sd )/sqrt( ngroups )
-   	if ( any( group_of_5 ) ) {
-   		no_group_of_5 <- sum( group_of_5 )
-   		parm_mean[32:33] <- colMeans( parms[-group_of_5,32:33] )
-   		parm_ses[32:33]  <- apply( parms[-group_of_5,32:33], 2, sd )/sqrt( ngroups - no_group_of_5 )
-   	}
-
-   	#- get final estimates:
-   	parm_order <- c(1,2,3,10,11,12,28,4,5,7,13,14,15,16,19,23,22,17,25,31,30,29,32)
-   	est <- parm_mean[parm_order]
-   	ses <- parm_ses[parm_order]
-
-   	#- make a table
-   	tab <- data.frame(Est=est, Std.Error=ses)
-   	return( list( tab=tab, parm_mean=parm_mean, parm_ses=parm_ses ) )
+	#- return ...
+	if ( with_info ) {
+		return( list( gparm=gparm, person=cbind(actor,partner,judge), 
+			dyads=cbind( c( ab_ij, ab_ji ), c( ab_ji, ab_ij ), 
+				     c( ac_ij, ac_ji ), c( ac_ji, ac_ij ),
+				     c( bc_ij, bc_ji ), c( bc_ji, bc_ij ) ) ) )
+	} else {
+		return( gparm )
+	}
 
 }
