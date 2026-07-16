@@ -1,7 +1,8 @@
 
 #---- this function generates the parameter matrices per group:
 
-make_parmlist <- function( parm_table=NULL, names_list=NULL, args_list=NULL, model=c("srm","tsrm") )
+make_parmlist <- function( parm_table=NULL, names_list=NULL, 
+	args_list=NULL, model=c("srm","tsrm","htsrm") )
 {
 	#- get no. of variables:
     no_vars <- names_list$no_var

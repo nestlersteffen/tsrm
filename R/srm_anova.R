@@ -62,7 +62,7 @@ srm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL, wi
 					psumsq[3,3], psumsq[4,4], dsumsq[3,3], psumsq[3,4], psumsq[3,4], dsumsq[3,4],
 					psumsq[2,3], psumsq[1,4], dsumsq[1,4], psumsq[1,3], psumsq[2,4], dsumsq[1,3] )
 		gparm <- as.vector(S %*% matrix(sumsq, nrow = 6, ncol = 3))
-		gparm <- gparm[c(2,1,7,8,4,16,14,13,17,3,9,6,18,15,12)]
+		gparm <- gparm[c(2,1,7,8,4,16,14,13,17,10,3,9,6,18,15,12)]
 	}
 
 	#- return ...

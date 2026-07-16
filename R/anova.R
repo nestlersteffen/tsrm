@@ -8,7 +8,7 @@ anova <- function( data=NULL, names_list=NULL, parm_table=NULL, with_ses=TRUE,
 	model <- match.arg( model )
 	if ( model == "srm" ) {
 	 	anova_singlegroup <- srm_anova_singlegroup
-	 	if ( names_list$no_var == 1 ) no_parms <- 5 else no_parms <- 15
+	 	if ( names_list$no_var == 1 ) no_parms <- 5 else no_parms <- 16
 	} else if ( model == "tsrm" ) {
 		anova_singlegroup <- tsrm_anova_singlegroup
 		if ( names_list$no_var == 1 ) no_parms <- 23 else no_parms <- 79
@@ -59,7 +59,12 @@ anova <- function( data=NULL, names_list=NULL, parm_table=NULL, with_ses=TRUE,
    		}
    	}
 
+   	#- add to parm_table:
+   	idx <- which( parm_table$type=="BETA" )
+   	parm_table$anova_est <- c( rep(NA,length(idx)), parm_mean )
+   	parm_table$anova_se  <- c( rep(NA,length(idx)), parm_ses )
+
    	#- make output object:
-   	result <- data.frame(Est=parm_mean, Std.Error=parm_ses) 
- 	return( result )
+   	# result <- data.frame(Est=parm_mean, Std.Error=parm_ses) 
+ 	return( parm_table )
 }

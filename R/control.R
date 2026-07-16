@@ -7,6 +7,7 @@ make_args_list <- function(
 	type_ses = "Standard",
 	method = "c++",
 	n_threads = 1L,
+	starts = "none",
 	large = FALSE,
 	maxit = 1000L,
 	maxeval = 5000L,
@@ -45,6 +46,10 @@ make_args_list <- function(
 	if ( !large | !use_rcpp ) {
 		use_rcpp <- FALSE
 		large    <- FALSE
+	}
+
+	if ( !( starts %in% c("none","anova") ) ) {
+		stop("Undefined method for start values.")
 	}
 
 	#- make args for ML estimation:
@@ -98,6 +103,7 @@ make_args_list <- function(
 		fixed_group = fixed_group,
 		method = method,
 		n_threads = 1L,
+		starts = starts,
 		large = large,
 		type_ses = type_ses,
 		nlminb_ctrl = nlminb_ctrl,

@@ -77,8 +77,9 @@ srm <- function( formula = NULL, g_var = NULL, p_var = NULL, d_var = NULL,
 	  	args_list=args_list, model="srm" )
 
 	#--- step 6: add start values ( optional )
-	parm_table <- add_starts( parm_table=parm_table, data_list=data_list, 
-	 	args_list=args_list )
+	parm_table <- add_starts( data=srm_data, parm_table=parm_table, parm_list=parm_list, 
+		data_list=data_list, args_list=args_list, names_list=names_list,
+		model="srm" )
 
 	if ( debug ) {
 		result <- list( parm_table=parm_table, parm_list=parm_list, data_list=data_list, 

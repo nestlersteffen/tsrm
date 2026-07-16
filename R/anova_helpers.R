@@ -202,3 +202,93 @@ htsrm_anova_build_crossS <- function(N=NULL)
   	}  
 	return( C_cross )
 }
+
+#- ------ function to obtain sds and corrs based on anova-estimates
+
+anova_transform_estimates <- function( parm_table=NULL, parm_list=NULL, names_list=NULL, 
+	model=c("srm","tsrm","htsrm"), standardization=FALSE ) 
+{
+	
+	#- get model
+	model <- match.arg( model )
+	if ( model == "srm" ) {
+		include_free_parms <- srm_include_free_parameters
+	} else if ( model == "tsrm" ) {
+		include_free_parms <- tsrm_include_free_parameters
+	} else if ( model == "htsrm" ) {
+		include_free_parms <- htsrm_include_free_parameters
+	}
+
+	#- we include anova estimates in parm_list by treating them as SDs and RHOs
+	parm_list <- include_free_parms( parm=parm_table$anova_est, 
+		parm_list=parm_list, parm_table=parm_table )
+
+	#- obtain parm_list entries:
+	SD_P  <- parm_list[["SD_P"]]
+	SD_D  <- parm_list[["SD_D"]]
+	SD_T  <- parm_list[["SD_T"]]
+	RHO_P <- parm_list[["RHO_P"]]
+	RHO_D <- parm_list[["RHO_D"]]
+	RHO_T <- parm_list[["RHO_T"]]
+
+	#- obtain true covariance matrix:
+	SIGMA_P <- SD_P + RHO_P - diag(1,ncol(RHO_P))
+	SIGMA_D <- SD_D + RHO_D - diag(1,ncol(RHO_D))
+	SIGMA_T <- if ( ncol( SD_T > 0 ) ) SD_T + RHO_T - diag(1,ncol(RHO_T))
+
+	#- we re-calculate the entries in the matrices:
+	parm_list$SD_P  <- sqrt(SD_P)
+	parm_list$SD_D  <- sqrt(SD_D)
+	parm_list$SD_T  <- if ( ncol( SD_T > 0 ) ) sqrt(SD_T)
+	parm_list$RHO_P <- cov2cor( SIGMA_P )
+	parm_list$RHO_D <- cov2cor( SIGMA_D )
+	parm_list$RHO_T <- if ( ncol( SD_T > 0 ) ) cov2cor( SIGMA_T )
+
+	#- we read out the entry to add them to parm_table
+	est <- rep( NA, nrow( parm_table ) )
+    
+    #- fill the sds and correlations into est
+    NP  <- max(parm_table$index)
+  	NOP <- nrow(parm_table)
+    for ( nn in 1:NOP ) {
+        # get infos from parm_table:
+        type  <- parm_table[nn,"type"]
+	    pos1  <- parm_table[nn,"pos1"]
+	    pos2  <- parm_table[nn,"pos2"]
+    	index <- parm_table[nn,"index"]
+    	# now include the estimates in est
+    	est[ index ] <- parm_list[[ type ]][ pos1,pos2 ]   
+    }
+
+    #- add these estimates to parm_table
+    parm_table$anova_transformed <- est
+
+    #- compute standard TripleR standardization:
+    if ( standardization ) {
+    	parm_table$anova_standardized <- parm_table$anova_transformed
+    	#- get correct indices:
+    	if ( model == "srm" ) {
+			idx1 <- which( parm_table$type %in% c("SD_P","SD_D") & parm_table$pos1 <= 2 )
+			idx2 <- which( parm_table$type %in% c("SD_P","SD_D") & parm_table$pos1 > 2 )
+		} else if ( model == "tsrm" ) {
+			idx1  <- c( which( parm_table$type %in% c("SD_P") & parm_table$pos1 <= 3 ), 
+						which( parm_table$type %in% c("SD_D","SD_T") & parm_table$pos1 <= 6 ) )
+			idx2  <- c( which( parm_table$type %in% c("SD_P") & parm_table$pos1 > 3 ), 
+						which( parm_table$type %in% c("SD_D","SD_T") & parm_table$pos1 > 6 ) )
+		} else if ( model == "htsrm" ) {
+			idx1  <- c( which( parm_table$type %in% c("SD_P") & parm_table$pos1 <= 3 ), 
+						which( parm_table$type %in% c("SD_D","SD_T") & parm_table$pos1 <= 6 ) )
+			idx2  <- c( which( parm_table$type %in% c("SD_P") & parm_table$pos1 > 3 ), 
+						which( parm_table$type %in% c("SD_D") & parm_table$pos1 > 6 ) )
+		} 
+		#- compute standardized estimates:
+		sum_of_vars <- sum( parm_table[idx1, "anova_est"] )
+		parm_table$anova_standardized[idx1] <- parm_table$anova_est[idx1]/sum_of_vars
+		if ( names_list$no_var == 2 ) {
+				sum_of_vars <- sum( parm_table[idx2, "anova_est"] )
+				parm_table$anova_standardized[idx2] <- parm_table$anova_est[idx2]/sum_of_vars
+		}
+    }
+
+    return( parm_table )
+}

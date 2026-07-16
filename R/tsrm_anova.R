@@ -101,9 +101,10 @@ tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL, w
 					dsumsq[3,3], dsumsq[5,5], dsumsq[1,1], dsumsq[3,4], dsumsq[5,6], dsumsq[1,2],
 					dsumsq[3,5], dsumsq[3,1], dsumsq[3,5], dsumsq[5,2], dsumsq[3,1], dsumsq[5,2],
 					dsumsq[3,6], dsumsq[1,4], dsumsq[3,6], dsumsq[1,5], dsumsq[1,4], dsumsq[1,5],
+					
 					tsumsq[1,1], tsumsq[1,2], tsumsq[1,3], tsumsq[1,4], tsumsq[1,5], tsumsq[1,5] )
 		gparm <- invS%*%sumsq
-		gparm <- gparm[c(1,2,3,10,11,12,28,4,5,7,13,14,15,16,19,23,22,17,25,31,30,29,32)]
+		gparm <- gparm[c(2,3,1,7,6,5,12,10,11,15,13,14,17,21,16,23,25,24,28,31,29,30,32)]
 	} else {
 		#- split the matrices
 		psumsq1  <- psumsq[1:3,1:3]

@@ -2,7 +2,7 @@
 #---- this function generates the parm_table that we use in optimization
 
 make_parmtable <- function( data_list=NULL, names_list=NULL, args_list=NULL, 
-    model=c("srm","tsrm") )
+    model=c("srm","tsrm","htsrm") )
 {
 	
     #- get no. of variables:
