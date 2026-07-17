@@ -39,8 +39,10 @@ htsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL )
 
 	#- Step 5: rearrange in the order of the parm_table:
 	gparm <- c( tsrm_parm, srm_parm, cross_parm)
-	gparm <- gparm[ c(1,2,3,24,25, 4,5,32,31, 6,30,29, 34,33, 26, 
-		              7,8,9,27, 10,11,12,28, 13,14,15,16,17,18, 35,36,39,40,38,37,
+	gparm <- gparm[ c(1,2,3,24,25, 
+				      4,5,32,31, 6,30,29, 34,33, 26, 
+		              7,8,9,27, 
+		              10,11,12,28,13,14,15,16,17,18, 35,36,39,40,38,37,
 		              19,20,21,22,23) ]
 	return( gparm )
 

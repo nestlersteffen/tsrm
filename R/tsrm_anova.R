@@ -117,7 +117,8 @@ tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL, w
 		tsumsq2  <- tsumsq[6:10,6:10]
 		tsumsq12 <- tsumsq[1:5,6:10]
 		#- make vectors
-		sumsq <- c( psumsq1[3,3], psumsq1[1,1], psumsq1[2,2], psumsq1[1,3], psumsq1[2,3], 
+		sumsq <- c( # Variable 1
+					psumsq1[3,3], psumsq1[1,1], psumsq1[2,2], psumsq1[1,3], psumsq1[2,3], 
 	 				psumsq1[1,3], psumsq1[1,2], psumsq1[2,3], psumsq1[1,2],
 					dsumsq1[3,3], dsumsq1[5,5], dsumsq1[1,1], dsumsq1[3,4], dsumsq1[5,6], dsumsq1[1,2],
 					dsumsq1[3,5], dsumsq1[3,1], dsumsq1[3,5], dsumsq1[5,2], dsumsq1[3,1], dsumsq1[5,2],
@@ -130,23 +131,39 @@ tsrm_anova_singlegroup <- function( group_data=NULL, np=NULL, names_list=NULL, w
 					dsumsq2[3,5], dsumsq2[3,1], dsumsq2[3,5], dsumsq2[5,2], dsumsq2[3,1], dsumsq2[5,2],
 					dsumsq2[3,6], dsumsq2[1,4], dsumsq2[3,6], dsumsq2[1,5], dsumsq2[1,4], dsumsq2[1,5],
 					tsumsq2[1,1], tsumsq2[1,2], tsumsq2[1,3], tsumsq2[1,4], tsumsq2[1,5], tsumsq2[1,5],
-					# Variable 3
+					# Variable 3 (ab 67)
 					psumsq12[3,3], psumsq12[1,1], psumsq12[2,2], psumsq12[3,1], psumsq12[3,2], 
 	 				psumsq12[1,3], psumsq12[1,2], psumsq12[2,3], psumsq12[2,1],
-	 				dsumsq12[3,3], dsumsq12[5,5], dsumsq12[1,1], dsumsq12[3,4], dsumsq12[5,6], 
-	 				dsumsq12[1,2],
-					dsumsq12[3,5], dsumsq12[3,1], dsumsq12[5,3], dsumsq12[5,2], 
+	 				dsumsq12[3,3], # 76 --
+	 				dsumsq12[5,5], # 77 --
+	 				dsumsq12[1,1], # 78 --
+	 				dsumsq12[3,4], # 79 --
+	 				dsumsq12[5,6], # 80 --
+	 				dsumsq12[1,2], # 81 --
+					dsumsq12[3,5], # 82 --
+					dsumsq12[3,1], # 83 --
+					dsumsq12[5,3], # 84 --
+					dsumsq12[5,2], # 85 -- 
 					###
-					dsumsq12[1,4], # dsumsq12[3,1], 
-					dsumsq12[2,5],
-					dsumsq12[3,6], 
-					dsumsq12[4,1], 
-					dsumsq12[6,3], dsumsq12[5,1], 
-					dsumsq12[1,3], # dsumsq12[1,4], 
-					dsumsq12[1,5],
+					dsumsq12[1,4], # 86 -- # dsumsq12[3,1], 
+					dsumsq12[2,5], # 87 
+					dsumsq12[3,6], # 88 --
+					dsumsq12[4,1], # 89 (5-10)
+					dsumsq12[6,3], # 90 (3-8)
+					dsumsq12[5,1], # 91 --
+					dsumsq12[1,3], # 92 -- # dsumsq12[1,4], 
+					dsumsq12[1,5], # 93 --
 					tsumsq12[1,1], tsumsq12[1,2], tsumsq12[1,3], tsumsq12[1,4], tsumsq12[2,4], tsumsq12[2,3] )
 		gparm <- as.vector(invS %*% matrix(sumsq, nrow = 33, ncol = 3))
-		gparm <- gparm[c(1,2,3,10,11,12,28,4,5,7,13,14,15,16,19,23,22,17,25,31,30,29,32)]
+		gparm <- gparm[c(2,3,1,35,36,34,
+			7,6,5,40,39,38, 68,73,72,75,69,74,70,71,67,
+			12,10,11,45,43,44,
+			15,13,14,17,21,16,23,25,24, 48,46,47,50,54,49,56,58,57,
+			78,81,92,86,93,87, 
+			83,90,76,79,82,88,
+			91,85,84,89,77,80,
+			28,61,31,29,30,32,64,62,63,65,
+			94,96,98,95,97,99 )]
 
 	}
 	
