@@ -96,7 +96,10 @@ tsrm_anova_buildS <- function(N=NULL)
 		      
 	    }
 	}
-	  
+
+	# make C_triad smaller in case there are five persons
+	if ( N == 5 ) C_triad <- C_triad[1:31,1:31]
+	
 	return(C_triad)
   
 }
@@ -206,7 +209,7 @@ htsrm_anova_build_crossS <- function(N=NULL)
 #- ------ function to obtain sds and corrs based on anova-estimates
 
 anova_transform_estimates <- function( parm_table=NULL, parm_list=NULL, names_list=NULL, 
-	model=c("srm","tsrm","htsrm"), standardization=FALSE ) 
+	model=c("srm","tsrm","htsrm"), as_starts=TRUE, standardization=FALSE ) 
 {
 	
 	#- get model
@@ -237,9 +240,15 @@ anova_transform_estimates <- function( parm_table=NULL, parm_list=NULL, names_li
 	SIGMA_T <- if ( ncol( SD_T > 0 ) ) SD_T + RHO_T - diag(1,ncol(RHO_T))
 
 	#- we re-calculate the entries in the matrices:
-	parm_list$SD_P  <- sqrt(SD_P)
-	parm_list$SD_D  <- sqrt(SD_D)
-	parm_list$SD_T  <- if ( ncol( SD_T > 0 ) ) sqrt(SD_T)
+	if ( as_starts ) {
+		parm_list$SD_P  <- sqrt( abs( SD_P ) )
+		parm_list$SD_D  <- sqrt( abs( SD_D ) )
+		parm_list$SD_T  <- if ( ncol( SD_T > 0 ) ) sqrt( abs( SD_T) )
+	} else {
+		parm_list$SD_P  <- sqrt( abs( SD_P ) )
+		parm_list$SD_D  <- sqrt( abs( SD_D ) )
+		parm_list$SD_T  <- if ( ncol( SD_T > 0 ) ) sqrt( abs( SD_T) )
+	}	
 	parm_list$RHO_P <- cov2cor( SIGMA_P )
 	parm_list$RHO_D <- cov2cor( SIGMA_D )
 	parm_list$RHO_T <- if ( ncol( SD_T > 0 ) ) cov2cor( SIGMA_T )

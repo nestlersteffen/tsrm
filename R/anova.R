@@ -27,7 +27,7 @@ anova <- function( data=NULL, names_list=NULL, parm_table=NULL, with_ses=TRUE,
 	group_ids  <- unique( data[,g_var] )
 	ngroups    <- length( group_ids )
 	parms      <- matrix( 0, nrow=ngroups, ncol=no_parms)
-	group_of_5 <- rep(FALSE, ngroups)
+	group_of_5 <- rep( FALSE, ngroups )
 
 	#- compute group-specific parameter estimates:
 	for ( ng in seq( ngroups ) ) {
@@ -47,7 +47,7 @@ anova <- function( data=NULL, names_list=NULL, parm_table=NULL, with_ses=TRUE,
    	#- get the average of the group-specific estimates:
    	parm_mean <- colMeans( parms )
    	if ( model != "srm" & any( group_of_5 ) ) {
-   		parm_mean[no_parms] <- colMeans( parms[-group_of_5,no_parms] )
+   		parm_mean[no_parms] <- colMeans( as.matrix( parms[!group_of_5,no_parms] ) ) 
    	}
 
    	#- compute the standard errors of the average estimates:
@@ -55,7 +55,8 @@ anova <- function( data=NULL, names_list=NULL, parm_table=NULL, with_ses=TRUE,
    	if ( with_ses & ngroups > 1 ) {
    		parm_ses <- apply( parms, 2, sd )/sqrt( ngroups )
    		if ( model != "srm" & any( group_of_5 ) ) {
-   			parm_ses[no_parms] <- apply( parms[-group_of_5,no_parms], 2, sd )/sqrt( ngroups - no_group_of_5 )
+   			no_group_of_5 <- sum( group_of_5 )
+   			parm_ses[no_parms] <- apply( as.matrix( parms[!group_of_5,no_parms] ), 2, sd )/sqrt( ngroups - no_group_of_5 )
    		}
    	}
 
