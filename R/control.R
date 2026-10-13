@@ -43,10 +43,10 @@ make_args_list <- function(
 		fixed_group <- FALSE
 	}
 
-	if ( !large | !use_rcpp ) {
-		use_rcpp <- FALSE
-		large    <- FALSE
-	}
+	# if ( !large | !use_rcpp ) {
+	# 	use_rcpp <- FALSE
+	# 	large    <- FALSE
+	# }
 
 	if ( !( starts %in% c("none","anova") ) ) {
 		stop("Undefined method for start values.")
@@ -73,28 +73,27 @@ make_args_list <- function(
 	}
 
 	#- make args for Bayes:
-	if ( method == "Bayes" ) {
-		#- make default list:
-		default_list <- list( mb = NULL, invMb = NULL, 
+	# if ( method == "Bayes" ) {
+	# 	#- make default list:
+		default_list <- list( 
+			# scale of the outome:
+			y.scale = NULL,
+			# all things for Beta
+			mb = NULL, invMb = NULL, 
 			# all things for sigmap
-			prior_sigmap = "IW", # or LKJ
-			IW.nu0 = NULL, IW.S0 = NULL,
-			LKJ.eta = NULL, LKJ.scale = NULL, LKJ.nu = NULL, LKJ.tau = NULL,
+			prior_sigmap = "IW", # or LKJ or LKJ_single
+			IW.nup = NULL, IW.Sp = NULL,
+			LKJ.eta = NULL, Ht.scale = NULL, Ht.nu = NULL, tau = NULL,
+			tau_sd = NULL, tau_rho = NULL,
 			# all things for sigmad
-			sigmad_update = "joint", # vs. seperate
-			prior_sigmad = "HalfCauchy", # vs. Halft vs. Uniform
-			HCd_s = NULL, Htd_scale = NULL, Htd_nu = NULL,
-			tau_sd_d = NULL, tau_rho_d = NULL,
+			IW.nud = NULL, IW.Sd = NULL,
 			# all thing for sigmat:
-			sigmat_update = "joint", # vs. separate
-			prior_sigmat = "HalfCauchy", # vs. Halft vs. Uniform
-			HCt_s = NULL, Htt_scale = NULL, Htt_nu = NULL,
-			tau_sd_t = NULL, tau_rho_t = NULL,
-			verbose = verbose )
+			IW.nut = NULL, IW.St = NULL,
+			IG.at = NULL, IG.bt = NULL )
 		#- add to final list:
 		mcmc_args <- c( mcmc_args, 
 			default_list[ !( names( default_list ) %in% names( mcmc_args ) ) ] )
-	}
+	#}
 	
 	args_list <- list( 
 		use_rcpp = use_rcpp, # use rcpp?

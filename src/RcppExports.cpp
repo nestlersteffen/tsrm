@@ -112,12 +112,58 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// tsrm_bayes_update_beta_export
+Rcpp::List tsrm_bayes_update_beta_export(const Eigen::MatrixXd& y, const Eigen::MatrixXd& X, const Eigen::MatrixXd& Zp, const Eigen::MatrixXd& Zd, const Eigen::MatrixXd& Zt, const Eigen::MatrixXd& G_T, const Eigen::MatrixXi& groupinfo, int ngroups, const Rcpp::List& person, const Rcpp::List& dyads, const Eigen::MatrixXd& mb, const Eigen::MatrixXd& invMb);
+RcppExport SEXP _tsrm_tsrm_bayes_update_beta_export(SEXP ySEXP, SEXP XSEXP, SEXP ZpSEXP, SEXP ZdSEXP, SEXP ZtSEXP, SEXP G_TSEXP, SEXP groupinfoSEXP, SEXP ngroupsSEXP, SEXP personSEXP, SEXP dyadsSEXP, SEXP mbSEXP, SEXP invMbSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zp(ZpSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zd(ZdSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zt(ZtSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type G_T(G_TSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type groupinfo(groupinfoSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type person(personSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type dyads(dyadsSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type mb(mbSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type invMb(invMbSEXP);
+    rcpp_result_gen = Rcpp::wrap(tsrm_bayes_update_beta_export(y, X, Zp, Zd, Zt, G_T, groupinfo, ngroups, person, dyads, mb, invMb));
+    return rcpp_result_gen;
+END_RCPP
+}
+// tsrm_bayes_update_effects_export
+Rcpp::List tsrm_bayes_update_effects_export(const Eigen::MatrixXd& y, const Eigen::MatrixXd& X, const Eigen::MatrixXd& Zp, const Eigen::MatrixXd& Zd, const Eigen::MatrixXd& invG_P, const Eigen::MatrixXd& invG_D, const Eigen::VectorXd& BETA, const Eigen::MatrixXi& groupinfo, int ngroups, const Rcpp::List& person, const Rcpp::List& dyads, SEXP OBJ_invVepsi);
+RcppExport SEXP _tsrm_tsrm_bayes_update_effects_export(SEXP ySEXP, SEXP XSEXP, SEXP ZpSEXP, SEXP ZdSEXP, SEXP invG_PSEXP, SEXP invG_DSEXP, SEXP BETASEXP, SEXP groupinfoSEXP, SEXP ngroupsSEXP, SEXP personSEXP, SEXP dyadsSEXP, SEXP OBJ_invVepsiSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zp(ZpSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zd(ZdSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type invG_P(invG_PSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type invG_D(invG_DSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type BETA(BETASEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type groupinfo(groupinfoSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type person(personSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type dyads(dyadsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type OBJ_invVepsi(OBJ_invVepsiSEXP);
+    rcpp_result_gen = Rcpp::wrap(tsrm_bayes_update_effects_export(y, X, Zp, Zd, invG_P, invG_D, BETA, groupinfo, ngroups, person, dyads, OBJ_invVepsi));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tsrm_compute_V_export", (DL_FUNC) &_tsrm_compute_V_export, 8},
     {"_tsrm_compute_V_sparse_export", (DL_FUNC) &_tsrm_compute_V_sparse_export, 8},
     {"_tsrm_gradient_singlegroup_export", (DL_FUNC) &_tsrm_gradient_singlegroup_export, 21},
     {"_tsrm_gradient_singlegroup_sparse_export", (DL_FUNC) &_tsrm_gradient_singlegroup_sparse_export, 24},
+    {"_tsrm_tsrm_bayes_update_beta_export", (DL_FUNC) &_tsrm_tsrm_bayes_update_beta_export, 12},
+    {"_tsrm_tsrm_bayes_update_effects_export", (DL_FUNC) &_tsrm_tsrm_bayes_update_effects_export, 12},
     {NULL, NULL, 0}
 };
 

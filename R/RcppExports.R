@@ -17,3 +17,11 @@ gradient_singlegroup_sparse_export <- function(parm_list, ty, tX, tZg, tZp, tZd,
     .Call(`_tsrm_gradient_singlegroup_sparse_export`, parm_list, ty, tX, tZg, tZp, tZd, tZt, Pp, Pd, Pt, perm_p, perm_d, perm_t, SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T, BETA, np, nd, nt, parm_mat, with_reml, model)
 }
 
+tsrm_bayes_update_beta_export <- function(y, X, Zp, Zd, Zt, G_T, groupinfo, ngroups, person, dyads, mb, invMb) {
+    .Call(`_tsrm_tsrm_bayes_update_beta_export`, y, X, Zp, Zd, Zt, G_T, groupinfo, ngroups, person, dyads, mb, invMb)
+}
+
+tsrm_bayes_update_effects_export <- function(y, X, Zp, Zd, invG_P, invG_D, BETA, groupinfo, ngroups, person, dyads, OBJ_invVepsi) {
+    .Call(`_tsrm_tsrm_bayes_update_effects_export`, y, X, Zp, Zd, invG_P, invG_D, BETA, groupinfo, ngroups, person, dyads, OBJ_invVepsi)
+}
+

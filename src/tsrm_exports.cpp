@@ -5,6 +5,7 @@
 // [[Rcpp::depends(RcppEigen)]]
 #include <RcppEigen.h>
 #include "ml_helpers.h"
+#include "bayes_helpers.h"
 
 // [[Rcpp::export]]
 Eigen::MatrixXd compute_V_export(
@@ -141,4 +142,48 @@ Eigen::VectorXd gradient_singlegroup_sparse_export(
         SIGMA_G, SIGMA_P, SIGMA_D, SIGMA_T,
         BETA, np, nd, nt,
         parm_mat, with_reml, model );
+}
+
+// [[Rcpp::export]]
+Rcpp::List tsrm_bayes_update_beta_export(
+    const Eigen::MatrixXd& y,
+    const Eigen::MatrixXd& X,
+    const Eigen::MatrixXd& Zp,
+    const Eigen::MatrixXd& Zd,  
+    const Eigen::MatrixXd& Zt,
+    const Eigen::MatrixXd& G_T,  
+    const Eigen::MatrixXi& groupinfo,
+    int ngroups,
+    const Rcpp::List& person,  // Liste von Vektoren
+    const Rcpp::List& dyads,   // Liste von Vektoren
+    const Eigen::MatrixXd& mb,
+    const Eigen::MatrixXd& invMb )
+{
+
+    return tsrm_bayes_update_beta_rcpp(
+        y, X, Zp, Zd, Zt, G_T, groupinfo,
+        ngroups, person, dyads, mb, invMb );
+
+} 
+
+// [[Rcpp::export]]
+Rcpp::List tsrm_bayes_update_effects_export(
+    const Eigen::MatrixXd& y,
+    const Eigen::MatrixXd& X,
+    const Eigen::MatrixXd& Zp,
+    const Eigen::MatrixXd& Zd,
+    const Eigen::MatrixXd& invG_P,
+    const Eigen::MatrixXd& invG_D,
+    const Eigen::VectorXd& BETA,
+    const Eigen::MatrixXi& groupinfo,
+    int ngroups,
+    const Rcpp::List& person,  // Liste von Vektoren
+    const Rcpp::List& dyads,   // Liste von Vektoren
+    SEXP OBJ_invVepsi )
+{
+
+    return tsrm_bayes_update_effects_rcpp( 
+        y, X, Zp, Zd, invG_P, invG_D, BETA, 
+        groupinfo, ngroups, person, dyads, OBJ_invVepsi );
+
 }
