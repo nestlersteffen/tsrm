@@ -3,7 +3,7 @@
 
 tsrm_bayes <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, 
 	names_list=NULL, tsrm_data=NULL, args_list=NULL, nchain=NULL, biter=NULL, 
-	burnin=NULL, verbose=TRUE )
+	burnin=NULL, verbose=TRUE, cl=NULL )
 {
 	
 	#- insert parm
@@ -33,15 +33,19 @@ tsrm_bayes <- function( parm_table=NULL, parm_list=NULL, data_list=NULL,
 
     } else {
 
-    	#- setup workers
-	    cl <- parallel::makeCluster(nchain)
-	    doParallel::registerDoParallel(cl)
-	    on.exit(parallel::stopCluster(cl), add = TRUE)
-	       
-        # parallel::clusterEvalQ(cl, {
-        #     RhpcBLASctl::blas_set_num_threads(1)
-        #     RhpcBLASctl::omp_set_num_threads(1)
-        # })
+    	if (is.null(cl)) {
+	        cl <- parallel::makeCluster(nchain)
+	        doParallel::registerDoParallel(cl)
+	        on.exit(parallel::stopCluster(cl), add = TRUE)
+
+	        parallel::clusterEvalQ(cl, {
+	            RhpcBLASctl::blas_set_num_threads(1)
+	            RhpcBLASctl::omp_set_num_threads(1)
+	        })
+
+	    } else {
+	        doParallel::registerDoParallel(cl)
+	    }
 
         #- run chains in parallel:
 	    nc <- NULL
