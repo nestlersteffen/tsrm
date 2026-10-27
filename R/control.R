@@ -89,7 +89,9 @@ make_args_list <- function(
 			IW.nud = NULL, IW.Sd = NULL,
 			# all thing for sigmat:
 			IW.nut = NULL, IW.St = NULL,
-			IG.at = NULL, IG.bt = NULL )
+			IG.at = NULL, IG.bt = NULL,
+			# all things for generating chain-specific start values
+			sd_log=0.5, eta=1, nu=8 )
 		#- add to final list:
 		mcmc_args <- c( mcmc_args, 
 			default_list[ !( names( default_list ) %in% names( mcmc_args ) ) ] )

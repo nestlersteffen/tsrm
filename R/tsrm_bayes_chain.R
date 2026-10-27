@@ -1,7 +1,7 @@
 
 #---- function that implements a chain of a MCMC sampler for the TSRM parms
 
-tsrm_bayes_chain <- function( inits=NULL, parm_list=NULL, data_list=NULL, args_list=NULL, 
+tsrm_bayes_chain <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_list=NULL, 
 	person=NULL, dyads=NULL, biter=NULL, verbose=NULL )
 {
 	
@@ -14,15 +14,14 @@ tsrm_bayes_chain <- function( inits=NULL, parm_list=NULL, data_list=NULL, args_l
 	sum_nd  <- sum( data_list$groupinfo[,2] )
 	
 	#- matrices to save the draws and the acceptance rates:
-	theta  <- matrix( 0, nrow=biter, length(inits) )
+	theta  <- matrix( 0, nrow=biter, length( parm_table$starts ) )
 	accept <- vector( "list", biter)
 
-	#- theta[,1] is starts plus some noise
-	theta[1,] <- rnorm( length(inits), inits, 0.01 )
+	#- the first value for update_p
 	update_p  <- c( sqrt( diag( SIGMA_P ) ), rep(0,3) ) 
 	
 	#- do some sampling...
-	for ( xx in 2:biter ) {
+	for ( xx in 1:biter ) {
 
 		if ( verbose & xx%%50 == 0 ) {
         	print( paste0( "Iteration: ", xx ) )

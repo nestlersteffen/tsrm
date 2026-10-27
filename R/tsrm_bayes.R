@@ -26,9 +26,14 @@ tsrm_bayes <- function( parm_table=NULL, parm_list=NULL, data_list=NULL,
 	#- sampling:
     if ( nchain == 1 ) {
 
-    	result <- tsrm_bayes_chain( inits=parm_table$starts, parm_list=parm_list, 
-    		data_list=data_list, args_list=args_list, person=person, dyads=dyads, 
-    		biter=biter, verbose=verbose )
+    	#- perturb initial start values
+	    inits <- tsrm_bayes_perturb( parm_list=parm_list, person=person, dyads=dyads, 
+	    	args_list=args_list, effects="prior" )
+
+	    #- start sampling:
+	    result <- tsrm_bayes_chain( parm_table=parm_table, parm_list=inits$parm_list, 
+	    	data_list=data_list, args_list=args_list, person=inits$person, 
+	    	dyads=inits$dyads, biter=biter, verbose=verbose )
     	result <- list( result )
 
     } else {
@@ -50,9 +55,14 @@ tsrm_bayes <- function( parm_table=NULL, parm_list=NULL, data_list=NULL,
         #- run chains in parallel:
 	    nc <- NULL
 	    result <- foreach::foreach( nc = seq(1, nchain, 1 ), .packages = "tsrm" ) %dopar% {
+
+	    	#- perturb initial start values
+	    	inits <- tsrm_bayes_perturb( parm_list=parm_list, person=person, dyads=dyads, 
+	    		args_list=args_list, effects="prior" )
         
-        	tsrm_bayes_chain( inits=parm_table$starts, parm_list=parm_list, 
-	    		data_list=data_list, args_list=args_list, person=person, dyads=dyads, 
+        	#- start sampling
+        	tsrm_bayes_chain( parm_table=parm_table, parm_list=inits$parm_list, data_list=data_list, 
+        		args_list=args_list, person=inits$person, dyads=inits$dyads, 
 	    		biter=biter, verbose=FALSE )
     	} 
         
