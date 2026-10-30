@@ -11,6 +11,26 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// tsrm_set_eigen_threads
+void tsrm_set_eigen_threads(int n);
+RcppExport SEXP _tsrm_tsrm_set_eigen_threads(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    tsrm_set_eigen_threads(n);
+    return R_NilValue;
+END_RCPP
+}
+// tsrm_get_eigen_threads
+int tsrm_get_eigen_threads();
+RcppExport SEXP _tsrm_tsrm_get_eigen_threads() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(tsrm_get_eigen_threads());
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_V_export
 Eigen::MatrixXd compute_V_export(const Eigen::MatrixXd& tZg, const Eigen::MatrixXd& tZp, const Eigen::MatrixXd& tZd, const Eigen::MatrixXd& tZt, const Eigen::MatrixXd& SIGMA_G, const Eigen::MatrixXd& SIGMA_P, const Eigen::MatrixXd& SIGMA_D, const Eigen::MatrixXd& SIGMA_T);
 RcppExport SEXP _tsrm_compute_V_export(SEXP tZgSEXP, SEXP tZpSEXP, SEXP tZdSEXP, SEXP tZtSEXP, SEXP SIGMA_GSEXP, SEXP SIGMA_PSEXP, SEXP SIGMA_DSEXP, SEXP SIGMA_TSEXP) {
@@ -113,8 +133,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // tsrm_bayes_update_beta_export
-Rcpp::List tsrm_bayes_update_beta_export(const Eigen::MatrixXd& y, const Eigen::MatrixXd& X, const Eigen::MatrixXd& Zp, const Eigen::MatrixXd& Zd, const Eigen::MatrixXd& Zt, const Eigen::MatrixXd& G_T, const Eigen::MatrixXi& groupinfo, int ngroups, const Rcpp::List& person, const Rcpp::List& dyads, const Eigen::MatrixXd& mb, const Eigen::MatrixXd& invMb);
-RcppExport SEXP _tsrm_tsrm_bayes_update_beta_export(SEXP ySEXP, SEXP XSEXP, SEXP ZpSEXP, SEXP ZdSEXP, SEXP ZtSEXP, SEXP G_TSEXP, SEXP groupinfoSEXP, SEXP ngroupsSEXP, SEXP personSEXP, SEXP dyadsSEXP, SEXP mbSEXP, SEXP invMbSEXP) {
+Rcpp::List tsrm_bayes_update_beta_export(const Eigen::MatrixXd& y, const Eigen::MatrixXd& X, const Eigen::MatrixXd& Zp, const Eigen::MatrixXd& Zd, const Eigen::MatrixXd& Zt, int nt, const Eigen::MatrixXd& G_T, const Eigen::MatrixXd& L_T, const Eigen::MatrixXi& groupinfo, int ngroups, const Rcpp::List& person, const Rcpp::List& dyads, const Eigen::MatrixXd& mb, const Eigen::MatrixXd& invMb, bool large);
+RcppExport SEXP _tsrm_tsrm_bayes_update_beta_export(SEXP ySEXP, SEXP XSEXP, SEXP ZpSEXP, SEXP ZdSEXP, SEXP ZtSEXP, SEXP ntSEXP, SEXP G_TSEXP, SEXP L_TSEXP, SEXP groupinfoSEXP, SEXP ngroupsSEXP, SEXP personSEXP, SEXP dyadsSEXP, SEXP mbSEXP, SEXP invMbSEXP, SEXP largeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -123,14 +143,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zp(ZpSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zd(ZdSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Zt(ZtSEXP);
+    Rcpp::traits::input_parameter< int >::type nt(ntSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type G_T(G_TSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type L_T(L_TSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type groupinfo(groupinfoSEXP);
     Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type person(personSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type dyads(dyadsSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type mb(mbSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type invMb(invMbSEXP);
-    rcpp_result_gen = Rcpp::wrap(tsrm_bayes_update_beta_export(y, X, Zp, Zd, Zt, G_T, groupinfo, ngroups, person, dyads, mb, invMb));
+    Rcpp::traits::input_parameter< bool >::type large(largeSEXP);
+    rcpp_result_gen = Rcpp::wrap(tsrm_bayes_update_beta_export(y, X, Zp, Zd, Zt, nt, G_T, L_T, groupinfo, ngroups, person, dyads, mb, invMb, large));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -158,11 +181,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_tsrm_tsrm_set_eigen_threads", (DL_FUNC) &_tsrm_tsrm_set_eigen_threads, 1},
+    {"_tsrm_tsrm_get_eigen_threads", (DL_FUNC) &_tsrm_tsrm_get_eigen_threads, 0},
     {"_tsrm_compute_V_export", (DL_FUNC) &_tsrm_compute_V_export, 8},
     {"_tsrm_compute_V_sparse_export", (DL_FUNC) &_tsrm_compute_V_sparse_export, 8},
     {"_tsrm_gradient_singlegroup_export", (DL_FUNC) &_tsrm_gradient_singlegroup_export, 21},
     {"_tsrm_gradient_singlegroup_sparse_export", (DL_FUNC) &_tsrm_gradient_singlegroup_sparse_export, 24},
-    {"_tsrm_tsrm_bayes_update_beta_export", (DL_FUNC) &_tsrm_tsrm_bayes_update_beta_export, 12},
+    {"_tsrm_tsrm_bayes_update_beta_export", (DL_FUNC) &_tsrm_tsrm_bayes_update_beta_export, 15},
     {"_tsrm_tsrm_bayes_update_effects_export", (DL_FUNC) &_tsrm_tsrm_bayes_update_effects_export, 12},
     {NULL, NULL, 0}
 };

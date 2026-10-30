@@ -8,6 +8,16 @@
 #include "bayes_helpers.h"
 
 // [[Rcpp::export]]
+void tsrm_set_eigen_threads( int n ) {
+    Eigen::setNbThreads( n );
+}
+
+// [[Rcpp::export]]
+int tsrm_get_eigen_threads() {
+    return Eigen::nbThreads();
+}
+
+// [[Rcpp::export]]
 Eigen::MatrixXd compute_V_export(
     const Eigen::MatrixXd& tZg,
     const Eigen::MatrixXd& tZp,
@@ -57,8 +67,6 @@ Eigen::VectorXd gradient_singlegroup_export(
     bool with_reml, const std::string& model )
 {
     
-    Eigen::setNbThreads(1);
-
     //-- get SD and RHO matrices from parm_list:
     Eigen::MatrixXd SD_P  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_P"]);
     Eigen::MatrixXd SD_D  = Rcpp::as<Eigen::MatrixXd>(parm_list["SD_D"]);
@@ -151,18 +159,21 @@ Rcpp::List tsrm_bayes_update_beta_export(
     const Eigen::MatrixXd& Zp,
     const Eigen::MatrixXd& Zd,  
     const Eigen::MatrixXd& Zt,
+    int nt,
     const Eigen::MatrixXd& G_T,  
+    const Eigen::MatrixXd& L_T, 
     const Eigen::MatrixXi& groupinfo,
     int ngroups,
     const Rcpp::List& person,  // Liste von Vektoren
     const Rcpp::List& dyads,   // Liste von Vektoren
     const Eigen::MatrixXd& mb,
-    const Eigen::MatrixXd& invMb )
+    const Eigen::MatrixXd& invMb,
+    bool large )
 {
 
     return tsrm_bayes_update_beta_rcpp(
-        y, X, Zp, Zd, Zt, G_T, groupinfo,
-        ngroups, person, dyads, mb, invMb );
+        y, X, Zp, Zd, Zt, nt, G_T, L_T, groupinfo,
+        ngroups, person, dyads, mb, invMb, large );
 
 } 
 

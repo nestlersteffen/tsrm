@@ -28,8 +28,10 @@ tsrm_bayes_chain <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, a
     	}
 
 		#- update BETA:
+		# Rprof("prof.out", interval = 0.005, line.profiling = TRUE)
 		tmp_BETA <- tsrm_bayes_update_beta( data_list=data_list, args_list=args_list, 
 			person=person, dyads=dyads, SIGMA_T=SIGMA_T )
+		# Rprof(NULL)
 		BETA 		 <- tmp_BETA$BETA
 		OBJ_invVepsi <- tmp_BETA$OBJ_invVepsi # a list
 		

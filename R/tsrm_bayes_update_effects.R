@@ -54,21 +54,38 @@ tsrm_bayes_update_effects <- function( data_list=NULL, args_list=NULL, person=NU
 			peffi <- person[[ng]]
 			deffi <- dyads[[ng]]
 
-			#- compute group-specific Veps:
-			invVepsi <- OBJ_invVepsi[[ ng ]]
+			# instead of using the inverse:
+			
+			# invVepsi  <- OBJ_invVepsi[[ ng ]]
+			# tmpZVp    <- crossprod( Zpi, invVepsi )
+			# OMEGAp    <- base::solve( tmpZVp %*% Zpi + invG_P )
+			# MUp	    <- OMEGAp %*% ( tmpZVp %*%( yi - Xi%*%BETA - Zdi%*%deffi ) )
+			# new_peffi <- t( mvtnorm::rmvnorm( 1, MUp, as.matrix( OMEGAp ) ) )
+					
+			# tmpZVd    <- crossprod( Zdi, invVepsi )
+			# OMEGAd    <- base::solve( tmpZVd %*% Zdi + invG_D )
+			# MUd	    <- OMEGAd %*% ( tmpZVd %*%( yi - Xi%*%BETA - Zpi%*%new_peffi ) )
+			# new_deffi <- t( mvtnorm::rmvnorm( 1, MUd, as.matrix( OMEGAd ) ) )
 
-			#- update person effects OMEGAp <- (OMEGAp + t(OMEGAp)) / 2  # Symmetrie erzwingen
-			tmpZVp <- crossprod( Zpi, invVepsi )
-			OMEGAp <- base::solve( tmpZVp %*% Zpi + invG_P )
-			MUp	   <- OMEGAp %*% ( tmpZVp %*%( yi - Xi%*%BETA - Zdi%*%deffi ) )
+			# we use the cholesky and backsolve
+			Vepsi_chol <- OBJ_invVepsi[[ ng ]]
+
+			#- backsolve:
+			W  <- base::backsolve( Vepsi_chol, cbind(Zpi, Zdi, yi - Xi %*% BETA), transpose = TRUE)
+			Wp <- W[, seq_len(ncol(Zpi)), drop = FALSE]
+			Wd <- W[, ncol(Zpi) + seq_len(ncol(Zdi)), drop = FALSE]
+			Wy <- W[, ncol(W), drop = FALSE]
+
+			#- update person effects
+			OMEGAp <- base::solve( crossprod(Wp) + invG_P )
+			MUp    <- OMEGAp %*% crossprod(Wp, Wy - Wd %*% deffi)
 			new_peffi <- t( mvtnorm::rmvnorm( 1, MUp, as.matrix( OMEGAp ) ) )
-				
-			#- update dyad effects (with new person-effects):
-			tmpZVd <- crossprod( Zdi, invVepsi )
-			OMEGAd <- base::solve( tmpZVd %*% Zdi + invG_D )
-			MUd	   <- OMEGAd %*% ( tmpZVd %*%( yi - Xi%*%BETA - Zpi%*%new_peffi ) )
+
+			#- update dyad effects (with new person effects)
+			OMEGAd <- base::solve( crossprod(Wd) + invG_D )
+			MUd    <- OMEGAd %*% crossprod(Wd, Wy - Wp %*% new_peffi)
 			new_deffi <- t( mvtnorm::rmvnorm( 1, MUd, as.matrix( OMEGAd ) ) )
-				
+
 			#- save in list:
 			new_person[[ng]] <- new_peffi
 			new_dyads[[ng]]  <- new_deffi
