@@ -43,17 +43,11 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	nd <- data_list[["nd"]]
 	nt <- data_list[["nt"]]
 	nv <- data_list[["nv"]]
-	# Pp <- data_list[["Pp"]]
-	# Pd <- data_list[["Pd"]]
-	# Pt <- data_list[["Pt"]]
 	perm_p <- data_list[["perm_p"]]
 	perm_d <- data_list[["perm_d"]]
 	perm_t <- data_list[["perm_t"]]
 	
 	#- make the matrices "big"
-	# SIGMA_P <- Pp %*% ( diag(1,np) %x% SIGMA_P ) %*% t( Pp )
-	# SIGMA_D <- Pd %*% ( diag(1,nd) %x% SIGMA_D ) %*% t( Pd )
-	# SIGMA_T <- if ( ncol(Zt) > 0 ) Pt %*% ( diag(1, nt) %x% parm_list[["SIGMA_T"]] ) %*% t( Pt ) else SIGMA_T
 	SIGMA_P <- diag(1,np) %x% SIGMA_P
 	SIGMA_P <- SIGMA_P[perm_p,perm_p]
 	SIGMA_D <- diag(1,nd) %x% SIGMA_D
@@ -64,8 +58,9 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	} 
 
 	#- get no. groups:
-	ngroups  <- nrow( groupinfo )
-	llfct    <- rep( 0, ngroups )
+	ngroups    	  <- nrow( groupinfo )
+	llfct      	  <- 0
+	llfct_penalty <- diag( 0, ncol(X) )
 
 	for ( ng in seq( ngroups ) ) {
 				
@@ -89,7 +84,7 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		Zp_ng <- Zp[idx1:idx2,]
 		Zd_ng <- Zd[idx1:idx2,]
 		Zt_ng <- if (ncol(Zt) > 0) Zt[idx1:idx2, ] else matrix(0, nrow = idx2 - idx1 + 1, ncol = 0)
-		X_ng  <- X[idx1:idx2,]
+		X_ng  <- X[idx1:idx2,,drop = FALSE]
 		y_ng  <- y[idx1:idx2] 		
 
 		#- compute mean:
@@ -106,22 +101,21 @@ compute_llfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 			V <- V + Zg_ng %*% SIGMA_G %*% t(Zg_ng)
 		}
 
-		#- compute loglik - value
-		res <- mvtnorm::dmvnorm( y_ng, Xb, as.matrix(V), log=TRUE )
+		#- add ll-ML component to llfct: 
+		llfct <- llfct + mvtnorm::dmvnorm( y_ng, Xb, as.matrix(V), log=TRUE )
 
-		#- add REML:
+		#- compute REML penalty term:
 		if ( args_list$with_reml ) {
 			iV  <- base::solve( V )
-			tmp <- t(X_ng)%*%iV%*%X_ng
-			logdet_tmp <- determinant( tmp, log = TRUE )$modulus[1]
-			res <- res - 0.5*logdet_tmp
+			llfct_penalty <- llfct_penalty + crossprod(X_ng,iV)%*%X_ng
 		}
 
-		llfct[ ng ] <- res
-
 	}
+
+	#- final step:
+	if ( args_list$with_reml ) llfct <- llfct - 0.5*determinant( llfct_penalty, log = TRUE )$modulus[1]
 	
 	#- result:
-	return( -1*sum( llfct ) )
+	return( -1*llfct )
 
 }

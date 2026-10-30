@@ -20,34 +20,39 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
         V <- V + Zg %*% SIGMA_G %*% t(Zg)
     }
 
+    #- inverse of V:
 	iV <- base::solve( V )
-	P  <- iV
-
-	#- residuals + ll:
+	
+	#- residuals + ll-value for ML - part:
 	ey    <- as.vector( y - X%*%BETA ) 
 	ei    <- crossprod( iV, ey )
-	ng_ll <- mvtnorm::dmvnorm( ey, rep(0,ncol(V)), as.matrix(V), log = TRUE )
+	llfct <- mvtnorm::dmvnorm( ey, rep(0,ncol(V)), as.matrix(V), log = TRUE )
 
-	#- REML:
-	if ( args_list$with_reml ) {
-		tmp   <- crossprod(X,iV)%*%X
-		ng_ll <- ng_ll - 0.5*determinant( tmp, logarithm=TRUE )$modulus[1]
-		P     <- iV - (iV%*%X)%*%base::solve(tmp)%*%(crossprod(X,iV))
-	}
-	
 	#- derivative for beta:
 	dBETA <- crossprod( ei, X )
 
 	#- we pre-compute some things....
-	if (ncol(Zg) > 0) { PZg <- P %*% Zg; Mg <- crossprod(Zg, PZg); wg <- crossprod(Zg, ei) }
-	PZp <- P %*% Zp;  Mp <- crossprod(Zp, PZp);  wp <- crossprod(Zp, ei)
-	PZd <- P %*% Zd;  Md <- crossprod(Zd, PZd);  wd <- crossprod(Zd, ei)
-	if (ncol(Zt) > 0) { PZt <- P %*% Zt; Mt <- crossprod(Zt, PZt); wt <- crossprod(Zt, ei) }
+	if ( ncol(Zg) > 0 ) { iVZg <- iV %*% Zg; Mg <- crossprod(Zg, iVZg); wg <- crossprod(Zg, ei) }
+	iVZp <- iV %*% Zp;  Mp <- crossprod(Zp, iVZp);  wp <- crossprod(Zp, ei)
+	iVZd <- iV %*% Zd;  Md <- crossprod(Zd, iVZd);  wd <- crossprod(Zd, ei)
+	if (ncol(Zt) > 0) { iVZt <- iV %*% Zt; Mt <- crossprod(Zt, iVZt); wt <- crossprod(Zt, ei) }
+
+	#- REML:
+	penvalue_ll <- 0L
+	XiVZg <- XiVZp <- XiVZd <- XiVZt <- 0L 
+	if ( args_list$with_reml ) {
+		XiV <- crossprod(X,iV)
+		XiVZg <- if ( ncol(Zg) > 0 ) XiV%*%Zg
+		XiVZp <- XiV%*%Zp; XiVZd <- XiV%*%Zd
+		XiVZt <- if ( ncol(Zt) > 0 ) XiV%*%Zt
+		penvalue_ll <- XiV%*%X 
+	}
 
 	#- now compute the gradient for the group:
-  	NP      <- max( parm_table$index)
-  	NOP     <- nrow( parm_table ) 
-  	ng_grad <- rep( 0, NP )
+  	NP   <- max( parm_table$index)
+  	NOP  <- nrow( parm_table ) 
+  	gradient <- rep( 0, NP )
+  	penvalue_gr <- if ( args_list$with_reml ) array( 0, c( ncol(X), ncol(X), NP ) ) else 0L
 
   	for ( nn in 1:NOP ) {
   
@@ -71,29 +76,35 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 		    if ( type %in% c("SD_P","RHO_P") ) { # c("SIGMA_P")
 		    	tmp <- diag(1, np) %x% sigma_derive
 		    	tmp <- tmp[perm_p, perm_p] # faster than: tmp <- Pp %*% ( diag(1, np ) %x% sigma_derive ) %*% t( Pp )
-		    	M <- Mp; w <- wp
+		    	M <- Mp; w <- wp; WZ <- XiVZp
 		    } else if ( type %in% c("SD_D","RHO_D") ) { # c("SIGMA_D")
 		    	tmp <- diag(1, nd) %x% sigma_derive
 		    	tmp <- tmp[perm_d, perm_d]
-    			M <- Md; w <- wd
+    			M <- Md; w <- wd; WZ <- XiVZd
 		    } else if ( type %in% c("SD_T","RHO_T") ) {  
 		    	tmp <- diag(1, nt) %x% sigma_derive
 		    	tmp <- tmp[perm_t, perm_t]
-			    M <- Mt; w <- wt
+			    M <- Mt; w <- wt; WZ <- XiVZt
 		    } else if ( type %in% c("SD_G", "RHO_G") ) {
                 tmp <- sigma_derive                   
-                M <- Mg; w <- wg
+                M <- Mg; w <- wg; WZ <- XiVZg
             }
 
 		    pt1 <- sum(tmp * M)                          # faster version for: tr(P V') = <S, Z^T P Z>
 			pt2 <- as.numeric(crossprod(w, tmp %*% w))   # faster version for: tei^T V' tei = w^T S w
-		    res 	 <- -0.5*( pt1 - pt2 )
+		    res <- -0.5*( pt1 - pt2 )
+		    
+		    #- things for REML penalty term:
+		    if ( args_list$with_reml ) {
+				penvalue_gr[,,index_nn] <- penvalue_gr[,,index_nn] + WZ%*%tmp%*%t(WZ)
+			}
 
 		}
 
-    	ng_grad[ index_nn ] <- ng_grad[ index_nn ] + res
+    	gradient[ index_nn ] <- gradient[ index_nn ] + res
+    	
   
   	}
 	
-	return( c( ng_ll, ng_grad ) )
+	return( list( llfct=llfct, gradient=gradient, penvalue_ll=penvalue_ll, penvalue_gr=penvalue_gr ) )
 }

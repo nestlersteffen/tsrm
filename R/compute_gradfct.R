@@ -63,10 +63,16 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	} 
 	
 	#- get no. groups:
-	ngroups  <- nrow( groupinfo )
-	gradient <- matrix( 0, nrow = ngroups, ncol = max( parm_table$index) ) 
-	llfct    <- rep( 0, ngroups )
-
+	ngroups <- nrow( groupinfo )
+	
+	#- define llfct and the gradient
+	llfct <- 0
+	gradient <- rep( 0, ncol = max( parm_table$index) ) 
+	
+	#- objects for reml-penalty terms
+	penvalue_ll <- if ( args_list$with_reml ) diag( 0, ncol(X) ) else 0L
+	penvalue_gr <- if ( args_list$with_reml ) array( 0, c( ncol(X), ncol(X), max( parm_table$index) ) ) else 0L
+	
 	#- let's go:
 	for ( ng in seq( ngroups ) ) {
 			
@@ -138,27 +144,40 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 
 		} else {
 
+			#- get group specfic values
 			tmp_grad <- compute_gradient_singlegroup(
 				parm_list=parm_list, parm_table=parm_table_ng, 
 				np=np, nd=nd, nt=nt, 
-				y=y[idx1:idx2], X=X[idx1:idx2,],
+				y=y[idx1:idx2], X=X[idx1:idx2,,drop=FALSE],
 				Zg=Zg_ng, Zp=Zp[idx1:idx2, ], Zd=Zd[idx1:idx2, ], Zt=Zt_ng, 
 				perm_p=perm_p, perm_d=perm_d, perm_t=perm_t,
 				BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
 				args_list=args_list, sigma_derivatives=sigma_derivatives )
+			
+			#- update overall values
+			llfct       <- llfct + tmp_grad$llfct
+			gradient    <- gradient + tmp_grad$gradient
+			penvalue_ll <- penvalue_ll + tmp_grad$penvalue_ll
+			penvalue_gr <- penvalue_gr + tmp_grad$penvalue_gr
 
 		}
 
-		llfct[ng]     <- tmp_grad[ 1]
-		gradient[ng,] <- tmp_grad[-1]
+	}
 
+	#- finally, we consider REML:
+	if ( args_list$with_reml ) { 
+		#- contribution to the likelihood
+		llfct <- llfct - 0.5*determinant( penvalue_ll, log = TRUE )$modulus[1]
+		#- contribution to the gradient:
+		iA <- base::solve( penvalue_ll )
+		gradient <- gradient + 0.5*apply( penvalue_gr, 3, function(x) sum( iA * x ) )
 	}
 	
 	#- output:
 	if ( both ) {
-		return( list( "objective"=-1*sum(llfct), "gradient"=-1*colSums(gradient) ) )
+		return( list( "objective"=-1*llfct, "gradient"=-1*gradient ) )
 	} else {
-		return( -1*colSums(gradient) )
+		return( -1*gradient )
 	}
 
 }
