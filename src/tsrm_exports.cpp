@@ -46,7 +46,7 @@ Eigen::MatrixXd compute_V_sparse_export(
 }
 
 // [[Rcpp::export]]
-Eigen::VectorXd gradient_singlegroup_export(
+Rcpp::List gradient_singlegroup_export(
     const Rcpp::List& parm_list,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,
@@ -98,7 +98,7 @@ Eigen::VectorXd gradient_singlegroup_export(
 }
 
 // [[Rcpp::export]]
-Eigen::VectorXd gradient_singlegroup_sparse_export(
+Rcpp::List gradient_singlegroup_sparse_export(
     const Rcpp::List& parm_list,
     const Eigen::MatrixXd& ty,
     const Eigen::MatrixXd& tX,

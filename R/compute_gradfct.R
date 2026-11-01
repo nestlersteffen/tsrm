@@ -71,7 +71,8 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 	
 	#- objects for reml-penalty terms
 	penvalue_ll <- if ( args_list$with_reml ) diag( 0, ncol(X) ) else 0L
-	penvalue_gr <- if ( args_list$with_reml ) array( 0, c( ncol(X), ncol(X), max( parm_table$index) ) ) else 0L
+	penvalue_gr <- if ( args_list$with_reml ) replicate( max( parm_table$index ), 
+		matrix(0, nrow = ncol(X), ncol = ncol(X)), simplify = FALSE) else 0L
 	
 	#- let's go:
 	for ( ng in seq( ngroups ) ) {
@@ -153,14 +154,14 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 				perm_p=perm_p, perm_d=perm_d, perm_t=perm_t,
 				BETA=BETA_ng, SIGMA_G=SIGMA_G, SIGMA_P=SIGMA_P, SIGMA_D=SIGMA_D, SIGMA_T=SIGMA_T, 
 				args_list=args_list, sigma_derivatives=sigma_derivatives )
-			
-			#- update overall values
-			llfct       <- llfct + tmp_grad$llfct
-			gradient    <- gradient + tmp_grad$gradient
-			penvalue_ll <- penvalue_ll + tmp_grad$penvalue_ll
-			penvalue_gr <- penvalue_gr + tmp_grad$penvalue_gr
 
 		}
+
+		#- update values
+		llfct       <- llfct + tmp_grad$llfct
+		gradient    <- gradient + tmp_grad$gradient
+		penvalue_ll <- penvalue_ll + tmp_grad$penvalue_ll
+		penvalue_gr <- Map("+", penvalue_gr, tmp_grad$penvalue_gr )
 
 	}
 
@@ -170,7 +171,7 @@ compute_gradfct <- function( parm=NULL, parm_list=NULL, parm_table=NULL,
 		llfct <- llfct - 0.5*determinant( penvalue_ll, log = TRUE )$modulus[1]
 		#- contribution to the gradient:
 		iA <- base::solve( penvalue_ll )
-		gradient <- gradient + 0.5*apply( penvalue_gr, 3, function(x) sum( iA * x ) )
+		gradient <- gradient + 0.5*unlist( lapply( penvalue_gr, function(x) sum( iA * x ) ), use.names=FALSE ) 
 	}
 	
 	#- output:

@@ -52,7 +52,8 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
   	NP   <- max( parm_table$index)
   	NOP  <- nrow( parm_table ) 
   	gradient <- rep( 0, NP )
-  	penvalue_gr <- if ( args_list$with_reml ) array( 0, c( ncol(X), ncol(X), NP ) ) else 0L
+  	penvalue_gr <- if ( args_list$with_reml ) replicate( max( parm_table$index ), 
+		matrix(0, nrow = ncol(X), ncol = ncol(X)), simplify = FALSE) else 0L
 
   	for ( nn in 1:NOP ) {
   
@@ -96,7 +97,7 @@ compute_gradient_singlegroup <- function( parm_list=NULL, parm_table=NULL,
 		    
 		    #- things for REML penalty term:
 		    if ( args_list$with_reml ) {
-				penvalue_gr[,,index_nn] <- penvalue_gr[,,index_nn] + WZ%*%tmp%*%t(WZ)
+				penvalue_gr[[index_nn]] <- penvalue_gr[[index_nn]] + WZ%*%tmp%*%t(WZ)
 			}
 
 		}

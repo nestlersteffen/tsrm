@@ -34,7 +34,7 @@ Eigen::MatrixXd compute_V_sparse(
     const Eigen::SparseMatrix<double>& SIGMA_D,
     const Eigen::SparseMatrix<double>& SIGMA_T );
 
-Eigen::VectorXd gradient_singlegroup_rcpp(
+Rcpp::List gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& SD_G,      
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
@@ -61,7 +61,7 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     const Eigen::MatrixXi& parm_mat,
     bool with_reml = false, const std::string& model = "srm" );
 
-Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
+Rcpp::List gradient_singlegroup_sparse_rcpp(
     const Eigen::MatrixXd& SD_G,
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,

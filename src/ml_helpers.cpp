@@ -53,7 +53,7 @@ Eigen::MatrixXd compute_V_sparse(
     return V;
 }
 
-Eigen::VectorXd gradient_singlegroup_rcpp(
+Rcpp::List gradient_singlegroup_rcpp(
     const Eigen::MatrixXd& SD_G,      
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
@@ -123,44 +123,50 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
     Eigen::VectorXd tei = iV * tey;
     
     //-- Step 4: we also compute the llfct-value:
-    double ng_ll = dmvnorm_centered_rcpp( tey, V, true );
+    double llfct = dmvnorm_centered_rcpp( tey, V, true );
 
-    //-- Step 5: consider REML-Penalty:
-    Eigen::MatrixXd P = iV;
-    if ( with_reml ) {
-        Eigen::MatrixXd iV_X = ldlt.solve(tX);
-        Eigen::MatrixXd tXt = tX.transpose();
-        Eigen::MatrixXd XtiVX = tXt * iV_X;
-        Eigen::LDLT<Eigen::MatrixXd> ldlt2(XtiVX);
-        Eigen::MatrixXd iV_Xt = iV_X.transpose();
-        Eigen::MatrixXd correction = iV_X * ldlt2.solve(iV_Xt);
-        P -= correction;
-        ng_ll -= 0.5*log_determinant_rcpp( XtiVX );
-    }
-
-    //-- Step 6: derivative for beta:
+    //-- Step 5: derivative for beta:
     Eigen::VectorXd dBETA = tei.transpose() * tX;
 
     //-- precompute once per group (für jeden Z-Block):
     Eigen::MatrixXd Mg; Eigen::VectorXd wg;
     if ( tZg.cols() > 0 ) {
-        Mg = tZg.transpose() * (P * tZg);
+        Mg = tZg.transpose() * (iV * tZg);
         wg = tZg.transpose() * tei;
     }
-    Eigen::MatrixXd Mp = tZp.transpose() * (P * tZp);
+    Eigen::MatrixXd Mp = tZp.transpose() * (iV * tZp);
     Eigen::VectorXd wp = tZp.transpose() * tei;
-    Eigen::MatrixXd Md = tZd.transpose() * (P * tZd);
+    Eigen::MatrixXd Md = tZd.transpose() * (iV * tZd);
     Eigen::VectorXd wd = tZd.transpose() * tei;
     Eigen::MatrixXd Mt; Eigen::VectorXd wt;
     if ( tZt.cols() > 0 ) {
-        Mt = tZt.transpose() * (P * tZt);
+        Mt = tZt.transpose() * (iV * tZt);
         wt = tZt.transpose() * tei;
+    }
+
+    //-- Step 6: REML-Penalty:
+    Eigen::MatrixXd penvalue_ll = Eigen::MatrixXd::Zero( tX.cols(), tX.cols() );
+    Eigen::MatrixXd XiVZg;
+    Eigen::MatrixXd XiVZp;
+    Eigen::MatrixXd XiVZd;
+    Eigen::MatrixXd XiVZt;
+    if ( with_reml ) {
+        Eigen::MatrixXd iV_X = ldlt.solve(tX);
+        Eigen::MatrixXd iV_Xt = iV_X.transpose();
+        Eigen::MatrixXd tXt = tX.transpose();
+        penvalue_ll = tXt * iV_X;
+        if ( tZg.cols() > 0 ) XiVZg = iV_Xt*tZg;
+        XiVZp = iV_Xt*tZp; XiVZd = iV_Xt*tZd;
+        if ( tZt.cols() > 0 ) XiVZt = iV_Xt*tZt;
     }
     
     // -- Step 7: iterate across posmat entries for the gradient:
     int NOP = parm_mat.rows();
     int NP  = parm_mat.col(3).maxCoeff();
-    Eigen::VectorXd ng_grad = Eigen::VectorXd::Zero( NP + 1 ); 
+    Eigen::VectorXd grad = Eigen::VectorXd::Zero( NP ); 
+    std::vector<Eigen::MatrixXd> penvalue_gr;
+    if ( with_reml ) penvalue_gr.assign( NP, Eigen::MatrixXd::Zero( tX.cols(), tX.cols() ) );
+    
     for(int nn = 0; nn < NOP; nn++) {
 
         // get type of parameter:
@@ -188,42 +194,50 @@ Eigen::VectorXd gradient_singlegroup_rcpp(
             Eigen::MatrixXd tmp;
             Eigen::MatrixXd M;
             Eigen::VectorXd w;
+            Eigen::MatrixXd WZ;
                 
             if ( type == 1 || type == 2 ) { 
                 tmp = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(np, np), sigma_derive );
                 tmp = Pp * tmp * Pp.transpose();
-                M = Mp; w = wp;
+                M = Mp; w = wp; WZ = XiVZp;
             } else if ( type == 3 || type == 4 ) {
                 tmp = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
                 tmp = Pd * tmp * Pd.transpose();
-                M = Md; w = wd;
+                M = Md; w = wd; WZ = XiVZd;
             } else if ( type == 7 || type == 8 ) {
                 tmp = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
                 tmp = Pt * tmp * Pt.transpose();
-                M = Mt; w = wt;
+                M = Mt; w = wt; WZ = XiVZt;
             } else if ( type == 5 || type == 6 ) {
                 tmp = sigma_derive;
-                M = Mg; w = wg;
+                M = Mg; w = wg; WZ = XiVZg;
             }
 
             double pt1 = tmp.cwiseProduct( M ).sum();   // tr(P V') = <S, Z^T P Z>
             double pt2 = w.dot( tmp * w );              // tei^T V' tei = w^T S w
             res = -0.5*( pt1 - pt2 );
 
+            //- things for REML penalty term:
+            if ( with_reml ) {
+                penvalue_gr[ index - 1] += WZ * tmp * WZ.transpose();
+            }
+
         }
 
-        ng_grad( index ) = res;
+        grad( index - 1 ) += res;
 
     }
-
-    //-- add ll-value:
-    ng_grad( 0 ) = ng_ll;
     
     //-- return output:
-    return ng_grad;
+    return Rcpp::List::create(
+        Rcpp::Named("llfct") = llfct,
+        Rcpp::Named("gradient") = grad,
+        Rcpp::Named("penvalue_ll") = penvalue_ll,
+        Rcpp::Named("penvalue_gr") = penvalue_gr
+    );
 }
 
-Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
+Rcpp::List gradient_singlegroup_sparse_rcpp(
     const Eigen::MatrixXd& SD_G,
     const Eigen::MatrixXd& SD_P,
     const Eigen::MatrixXd& SD_D,
@@ -277,9 +291,6 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
         Rcpp::stop("Unknown model '%s' in derivative dispatch.", model);
     }
 
-    // using clk = std::chrono::high_resolution_clock;
-    // auto t0 = clk::now();
-
     //-- Step 1: compute V:
     Eigen::MatrixXd V = compute_V_sparse(
         tZg, tZp, tZd, tZt,
@@ -294,44 +305,50 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
     Eigen::VectorXd tei = llt.solve( tey );
     
     //-- Step 4: we also compute the llfct-value:
-    double ng_ll = dmvnorm_centered_rcpp( tey, V, true );
+    double llfct = dmvnorm_centered_rcpp( tey, V, true );
     
-    //-- Step 5: consider REML-Penalty:
-    Eigen::MatrixXd P = iV;
-    if ( with_reml ) {
-        Eigen::MatrixXd iV_X = llt.solve(tX);
-        Eigen::MatrixXd tXt = tX.transpose();
-        Eigen::MatrixXd XtiVX = tXt * iV_X;
-        Eigen::LLT<Eigen::MatrixXd> llt2(XtiVX);
-        Eigen::MatrixXd iV_Xt = iV_X.transpose();
-        Eigen::MatrixXd correction = iV_X * llt2.solve(iV_Xt);
-        P -= correction;
-        ng_ll -= 0.5*log_determinant_rcpp( XtiVX );
-    }
-
-    //-- Step 6: derivative for beta:
+    //-- Step 5: derivative for beta:
     Eigen::VectorXd dBETA = tei.transpose() * tX;
 
     //-- precompute once per group (für jeden Z-Block):
     Eigen::MatrixXd Mg; Eigen::VectorXd wg;
     if ( tZg.cols() > 0 ) {
-        Mg = tZg.transpose() * (P * tZg);
+        Mg = tZg.transpose() * (iV * tZg);
         wg = tZg.transpose() * tei;
     }
-    Eigen::MatrixXd Mp = tZp.transpose() * (P * tZp);
+    Eigen::MatrixXd Mp = tZp.transpose() * (iV * tZp);
     Eigen::VectorXd wp = tZp.transpose() * tei;
-    Eigen::MatrixXd Md = tZd.transpose() * (P * tZd);
+    Eigen::MatrixXd Md = tZd.transpose() * (iV * tZd);
     Eigen::VectorXd wd = tZd.transpose() * tei;
     Eigen::MatrixXd Mt; Eigen::VectorXd wt;
     if ( tZt.cols() > 0 ) {
-        Mt = tZt.transpose() * (P * tZt);
+        Mt = tZt.transpose() * (iV * tZt);
         wt = tZt.transpose() * tei;
+    }
+
+    //-- Step 6: REML-Penalty:
+    Eigen::MatrixXd penvalue_ll = Eigen::MatrixXd::Zero( tX.cols(), tX.cols() );
+    Eigen::MatrixXd XiVZg;
+    Eigen::MatrixXd XiVZp;
+    Eigen::MatrixXd XiVZd;
+    Eigen::MatrixXd XiVZt;
+    if ( with_reml ) {
+        Eigen::MatrixXd iV_X = llt.solve(tX);
+        Eigen::MatrixXd iV_Xt = iV_X.transpose();
+        Eigen::MatrixXd tXt = tX.transpose();
+        penvalue_ll = tXt * iV_X;
+        if ( tZg.cols() > 0 ) XiVZg = iV_Xt*tZg;
+        XiVZp = iV_Xt*tZp; XiVZd = iV_Xt*tZd;
+        if ( tZt.cols() > 0 ) XiVZt = iV_Xt*tZt;
     }
 
     // -- Step 7: iterate across posmat entries for the gradient:
     int NOP = parm_mat.rows();
     int NP  = parm_mat.col(3).maxCoeff();
-    Eigen::VectorXd ng_grad = Eigen::VectorXd::Zero( NP + 1 ); 
+    Eigen::VectorXd grad = Eigen::VectorXd::Zero( NP + 1 ); 
+    std::vector<Eigen::MatrixXd> penvalue_gr;
+    if ( with_reml ) penvalue_gr.assign( NP, Eigen::MatrixXd::Zero( tX.cols(), tX.cols() ) );
+
     for(int nn = 0; nn < NOP; nn++) {
 
         // get type of parameter:
@@ -359,22 +376,23 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
             Eigen::MatrixXd tmp;
             Eigen::MatrixXd M;
             Eigen::VectorXd w;
+            Eigen::MatrixXd WZ;
                 
             if ( type == 1 || type == 2 ) { 
                 Eigen::MatrixXd tmp_s = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(np, np), sigma_derive );
                 tmp = tmp_s(perm_p,perm_p);
-                M = Mp; w = wp;
+                M = Mp; w = wp; WZ = XiVZp;
             } else if ( type == 3 || type == 4 ) {
                 Eigen::MatrixXd tmp_s = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nd, nd), sigma_derive );
                 tmp = tmp_s(perm_d,perm_d);
-                M = Md; w = wd;
+                M = Md; w = wd; WZ = XiVZd;
             } else if ( type == 7 || type == 8 ) {
                 Eigen::MatrixXd tmp_s = Eigen::kroneckerProduct( Eigen::MatrixXd::Identity(nt, nt), sigma_derive );
                 tmp = tmp_s(perm_t,perm_t);
-                M = Mt; w = wt;
+                M = Mt; w = wt; WZ = XiVZt;
             } else if ( type == 5 || type == 6 ) {
                 tmp = sigma_derive;
-                M = Mg; w = wg;
+                M = Mg; w = wg; WZ = XiVZg;
             }
 
             // compute gradient value:
@@ -382,15 +400,22 @@ Eigen::VectorXd gradient_singlegroup_sparse_rcpp(
             double pt2 = w.dot( tmp * w );
             res = -0.5*( pt1 - pt2 );
             
+            //- things for REML penalty term:
+            if ( with_reml ) {
+                penvalue_gr[ index - 1] += WZ * tmp * WZ.transpose();
+            }
+
         }
 
-        ng_grad( index ) = res;
+        grad( index - 1 ) += res;
 
     }
-
-    //-- add ll-value:
-    ng_grad( 0 ) = ng_ll;
     
     //-- return output:
-    return ng_grad;
+    return Rcpp::List::create(
+        Rcpp::Named("llfct") = llfct,
+        Rcpp::Named("gradient") = grad,
+        Rcpp::Named("penvalue_ll") = penvalue_ll,
+        Rcpp::Named("penvalue_gr") = penvalue_gr
+    );
 }
