@@ -345,7 +345,7 @@ Rcpp::List gradient_singlegroup_sparse_rcpp(
     // -- Step 7: iterate across posmat entries for the gradient:
     int NOP = parm_mat.rows();
     int NP  = parm_mat.col(3).maxCoeff();
-    Eigen::VectorXd grad = Eigen::VectorXd::Zero( NP + 1 ); 
+    Eigen::VectorXd grad = Eigen::VectorXd::Zero( NP ); 
     std::vector<Eigen::MatrixXd> penvalue_gr;
     if ( with_reml ) penvalue_gr.assign( NP, Eigen::MatrixXd::Zero( tX.cols(), tX.cols() ) );
 
