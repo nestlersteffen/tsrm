@@ -19,7 +19,6 @@ Type srm_groups_tmb( objective_function<Type>* obj )
     DATA_INTEGER(nd);
     DATA_IMATRIX(groupinfo);
     DATA_INTEGER(method); 
-    DATA_INTEGER(no_var);
     
     // information that we need later:
     int ncolX  = X.cols();
@@ -29,42 +28,51 @@ Type srm_groups_tmb( objective_function<Type>* obj )
   	
     // parameters:
     PARAMETER_VECTOR(BETA);
-    PARAMETER_VECTOR(sdP);
-    PARAMETER_VECTOR(rhoP);
-    PARAMETER_VECTOR(sdD);
-    PARAMETER_VECTOR(rhoD);
-    PARAMETER_VECTOR(sdG);
-    PARAMETER_VECTOR(rhoG);
+    PARAMETER_VECTOR(vecsdP);
+    PARAMETER_VECTOR(vecrhoP);
+    PARAMETER_VECTOR(vecsdD);
+    PARAMETER_VECTOR(vecrhoD);
+    PARAMETER_VECTOR(vecsdG);
     
     // make a covariance matrix for the persons:
-    matrix<Type> TAU_P = tsrmTMB::TAU( sdP, rhoP );
-    
+    matrix<Type> S_P = tsrmTMB::getS( vecsdP );
+    matrix<Type> R_P = tsrmTMB::getR2( vecrhoP );
+    matrix<Type> TAU_P = S_P*R_P*S_P;
+
     // make a covariance matrix for the dyads:
-    matrix<Type> TAU_D = tsrmTMB::bTAU_D( sdD, rhoD, no_var );
+    vector<Type> sdD = vecsdD.exp();
+    matrix<Type> S_D = sdD(0) * matrix<Type>::Identity(2,2);
+    matrix<Type> R_D = tsrmTMB::getR2( vecrhoD );
+    matrix<Type> TAU_D = S_D*R_D*S_D;
 
     // make covariance matrix for the groups:
-    matrix<Type> TAU_G = tsrmTMB::TAU( sdG, rhoG );
+    vector<Type> sdG = vecsdG.exp();
+    matrix<Type> TAU_G(1,1);
+    TAU_G(0,0) = sdG(0)*sdG(0);
 
     // compute big covariance matrices:
     matrix<Type> identp(np,np);
     identp.setIdentity();
-    matrix<Type> SIGMA_P = kronecker(TAU_P, identp);
+    matrix<Type> SIGMA_P = kronecker(identp,TAU_P);
     
     matrix<Type> identd(nd,nd);
     identd.setIdentity();
-    matrix<Type> SIGMA_D = kronecker(TAU_D, identd);
+    matrix<Type> SIGMA_D = kronecker(identd,TAU_D);
    
     // get group_infos:
     int ngroups = groupinfo.rows();
     
     // iterate through groups to overall likelihood;
     Type nll = 0;
+    matrix<Type> reml_penterm(ncolX,ncolX);
+    reml_penterm.setZero();
     int idx1 = 0;
     int idx2 = 0;
     
     for ( int ng = 0; ng < ngroups; ng++ ) {
+        
         // how many rows to go:
-        idx2 = groupinfo(ng,2);
+        idx2 = groupinfo(ng,3);
       
         // now we obtain the smaller matrices:
         vector<Type> ty  = y.block( idx1, 0, idx2, 1 );
@@ -85,18 +93,28 @@ Type srm_groups_tmb( objective_function<Type>* obj )
         // add REML:
         if ( method != 0 ) {
             matrix<Type> iV = V.inverse();
-            matrix<Type> tmp = tX.transpose()*iV*tX;
-            nll += 0.5*atomic::logdet( tmp );
+            reml_penterm += tX.transpose()*iV*tX;
         }
+
         // adpapt index:
-        idx1 += groupinfo(ng,2);   
+        idx1 += groupinfo(ng,3);   
     } 
     
-    // reporting:
+    if ( method != 0 ) nll += 0.5*atomic::logdet( reml_penterm );
+
+    // reporting - standard errors:
+    vector<Type> outsdP = S_P.diagonal();
+    vector<Type> outrhoP(1);
+    outrhoP(0) = R_P(0,1); 
+    vector<Type> outrhoD(1);
+    outrhoD(0) = R_D(0,1);
+
     ADREPORT(BETA);
-    ADREPORT(TAU_G);
-    ADREPORT(TAU_P);
-    ADREPORT(TAU_D);
+    ADREPORT(outsdP);
+    ADREPORT(outrhoP);
+    ADREPORT(sdD);
+    ADREPORT(outrhoD);
+    ADREPORT(sdG);
   	
     return nll;
 }

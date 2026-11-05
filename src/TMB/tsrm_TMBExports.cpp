@@ -5,6 +5,7 @@
 #include "tsrmTMB.h"
 #include "srm_tmb.hpp"
 #include "srm_groups_tmb.hpp"
+#include "tsrm_tmb.hpp"
 
 template<class Type>
 Type objective_function<Type>::operator() () {
@@ -13,6 +14,8 @@ Type objective_function<Type>::operator() () {
     return srm_tmb(this);
   } else if(model == "srm_groups_tmb") {
     return srm_groups_tmb(this);
+  } else if(model == "tsrm_tmb") {
+    return tsrm_tmb(this);
   } else {
     Rf_error("Unknown model.");
   }

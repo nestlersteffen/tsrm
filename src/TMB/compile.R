@@ -1,31 +1,21 @@
 
-tmb_name  <- "tsrm_TMBExports"
-tmb_flags <- commandArgs(trailingOnly = TRUE)
+tmb_name <- "tsrm_TMBExports"
 
-if(file.exists(paste0(tmb_name, ".cpp"))) {
-    
-    sysname <- Sys.info()["sysname"]
-    
-    if( sysname == "Darwin" ) {
-        openmp_flags <- "-Xclang -fopenmp"
-        openmp_libs  <- "-lomp"
-    } else {
-        # Windows & Linux:
-        openmp_flags <- "-fopenmp"
-        openmp_libs  <- "-lgomp"
+if (file.exists(paste0(tmb_name, ".cpp"))) {
+
+    # eigene Flags von der Kommandozeile (optional)
+    tmb_flags <- paste(commandArgs(trailingOnly = TRUE), collapse = " ")
+
+    # Windows: grosse Objektdateien erlauben
+    if (Sys.info()[["sysname"]] == "Windows") {
+        tmb_flags <- paste(tmb_flags, "-Wa,-mbig-obj")
     }
-    
-    if ( sysname == "Windows" ) {
-        openmp_flags <- paste(openmp_flags, "-Wa,-mbig-obj")
-    }
-    
-    if(length(tmb_flags) == 0) tmb_flags <- openmp_flags
-    
+
     TMB::compile(file = paste0(tmb_name, ".cpp"),
-                 PKG_CXXFLAGS = tmb_flags,
-                 PKG_LIBS     = openmp_libs,
+                 flags = trimws(tmb_flags),
+                 openmp = FALSE,
                  safebounds = FALSE, safeunload = FALSE)
-    
+
     file.copy(from = paste0(tmb_name, .Platform$dynlib.ext),
               to = "..", overwrite = TRUE)
 }

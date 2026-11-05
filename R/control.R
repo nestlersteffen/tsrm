@@ -1,11 +1,12 @@
 
 make_args_list <- function( 
 	use_rcpp = TRUE,
+	method = "reml", # ml, cml, creml, bayes 
 	with_reml = TRUE,
 	random_group = FALSE,
 	fixed_group = FALSE,
+	constrained = FALSE,
 	type_ses = "Standard",
-	method = "c++",
 	n_threads = 1L,
 	starts = "none",
 	large = FALSE,
@@ -23,8 +24,12 @@ make_args_list <- function(
 	...) 
 {
   
-	if ( !( method %in% c("c++","tmb","Bayes") ) ) {
-		stop("Undefined method defined.")
+	if ( !( method %in% c("ml","reml", "cml", "creml", "bayes") ) ) {
+		stop("Undefined value for 'method' used.")
+	}
+
+	if ( !( starts %in% c("none","anova") ) ) {
+		stop("Undefined value for 'starts' used.")
 	}
 
 	if( !is.list( mcmc_args ) ) { 
@@ -35,25 +40,19 @@ make_args_list <- function(
 		stop("'nlminb_list' has to be a list.") 
 	}
 
-	if ( fixed_group ) {
-		random_group <- FALSE
-	}
+	if ( method %in% c( "ml", "cml" ) ) with_reml <- FALSE
+	if ( method %in% c( "cml", "creml" ) ) constrained <- TRUE
 
-	if ( random_group ) {
-		fixed_group <- FALSE
-	}
+	if ( fixed_group ) random_group <- FALSE
+	if ( random_group ) fixed_group <- FALSE
 
 	# if ( !large | !use_rcpp ) {
 	# 	use_rcpp <- FALSE
 	# 	large    <- FALSE
 	# }
 
-	if ( !( starts %in% c("none","anova") ) ) {
-		stop("Undefined method for start values.")
-	}
-
 	#- make args for ML estimation:
-	if ( method == "c++" | method == "tmb" ) {
+	if ( method %in% c("ml", "reml", "cml", "creml" ) ) {
 		#- make default list:
 		default_list <- list( 
 			iter.max = maxit,
@@ -73,8 +72,8 @@ make_args_list <- function(
 	}
 
 	#- make args for Bayes:
-	# if ( method == "Bayes" ) {
-	# 	#- make default list:
+	if ( method == "bayes" ) {
+	 	#- make default list:
 		default_list <- list( 
 			# scale of the outome:
 			y.scale = NULL,
@@ -95,14 +94,15 @@ make_args_list <- function(
 		#- add to final list:
 		mcmc_args <- c( mcmc_args, 
 			default_list[ !( names( default_list ) %in% names( mcmc_args ) ) ] )
-	#}
+	}
 	
 	args_list <- list( 
 		use_rcpp = use_rcpp, # use rcpp?
+		method = method,
 		with_reml = with_reml,
 		random_group = random_group,
 		fixed_group = fixed_group,
-		method = method,
+		constrained = constrained,
 		n_threads = 1L,
 		starts = starts,
 		large = large,

@@ -24,7 +24,9 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 	#- ---------------------------
 	#-     fit the model
 
-	if ( args_list$method == "c++" ) {
+	if ( !args_list$constrained ) {
+
+		#print("ohne constraint")
 		
 		#- make the optimization function:
 		obj <- make_optfct( compute_gradfct, parm_list=parm_list, 
@@ -38,13 +40,14 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 		    error   = function(e) { NULL }
 		) )
 		
-	} else if ( args_list$method == "tmb" ) {
+	} else {
+
+		#print("mit constraint")
 
 		#- make tmb-data_list:
 		tdata <- list( y = data_list$y, X = data_list$X, Zp = data_list$Zp, 
 			Zd = data_list$Zd, np = data_list$np, nd = data_list$nd, 
-			groupinfo = data_list$groupinfo, method = args_list$with_reml, 
-			no_var = data_list$nv )
+			groupinfo = data_list$groupinfo, method = args_list$with_reml )
 		
 		#- make tmb-parm_list
 		idx_BETA <- which( parm_table$type == "BETA")
@@ -52,11 +55,12 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 		idx_rhoP <- which( parm_table$type == "RHO_P")
 		idx_sdD  <- which( parm_table$type == "SD_D")
 		idx_rhoD <- which( parm_table$type == "RHO_D")
-		tparm <- list( BETA=starts[idx_BETA], sdP=starts[idx_sdP], 
-			rhoP=starts[idx_rhoP], sdD=starts[idx_sdD], rhoD=starts[idx_rhoD] )
+		tparm <- list( BETA=starts[idx_BETA], vecsdP=log(starts[idx_sdP]), vecrhoP=starts[idx_rhoP] )
 
 		#- some adds in case of random groups:
 		if ( model == "srm" ) {
+
+			tparm <- append( tparm, list( vecsdD=log(starts[idx_sdD]), vecrhoD=starts[idx_rhoD] ) ) 
 
 			if ( args_list$random_group ) {
 			
@@ -72,7 +76,7 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 		 			idx_rhoG <- which( parm_table$type == "RHO_G")
 		 			rhoG     <- starts[idx_rhoG]
 		 		}
-		 		tparm <- c( tparm, sdG = starts[idx_sdG], rhoG = rhoG )
+		 		tparm <- c( tparm, vecsdG = log( starts[idx_sdG] ) )
 
 	 		} else { 
 		 	
@@ -85,12 +89,14 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 			#- add to data_list:
 			tdata <- append( tdata, list( Zt = data_list$Zt ), 4 )
 			tdata <- append( tdata, list( nt = data_list$nt ), 7 )
-			tdata <- c( tdata, model = "tsrm_tmb" )
+			tdata <- c( tdata, list( version = 1, model = "tsrm_tmb" ) )
 
 			#- add to tparm:
 			idx_sdT  <- which( parm_table$type == "SD_T")
 			idx_rhoT <- which( parm_table$type == "RHO_T")
-			tparm    <- c( tparm, sdT=starts[idx_sdT], rhoT=starts[idx_rhoT] )
+			tparm    <- append( tparm, list( 
+				vecsdD=rep( log( starts[idx_sdD] ), times=2 ), vecrhoD=starts[idx_rhoD],
+				vecsdT=starts[idx_sdT], vecrhoT=starts[idx_rhoT] ) )
 
 		}
 
@@ -109,13 +115,11 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 	#- error handling:
 	if (  is.null( fit ) || inherits( fit, "try-error" ) ) {
 	    parm_new <- starts
-	    break
+	    warning("Something bad happened during optimization.")
 	} else {
 		converged <- TRUE
 		parm_new  <- fit$par
 	    ll        <- -1*fit$objective
-	    parm_list <- include_free_parms( parm=parm_new, 
-	    	parm_list=parm_list, parm_table=parm_table )
 	}  
 
 	#- --------------------------------------------------
@@ -123,8 +127,28 @@ fit_model <- function( parm_table=NULL, parm_list=NULL, data_list=NULL, args_lis
 	if ( converged ) {
 		
 		#- get standard errors:
-		parm_table <- get_ses( parm=parm_new, parm_table=parm_table, parm_list=parm_list, 
-			data_list=data_list, args_list=args_list, model=model ) 
+		if ( !args_list$constrained ) {
+			#print("ohne constraint")
+			parm_table <- get_ses( parm=parm_new, parm_table=parm_table, parm_list=parm_list, 
+				data_list=data_list, args_list=args_list, model=model ) 
+		} else {
+			#print("mit constraint")
+			tmb_results   <- tryCatch({  TMB::sdreport( obj ) },
+				error = function(e) NULL )
+			if ( !is.null( tmb_results ) ) {
+				tmb_estimates <- unname( tmb_results$value )
+				tmb_stderrors <- tmb_results$sd
+			} else {
+				tmb_estimates <- tmb_stderrors <- rep( NA, length( parm_new ) )
+				warning("Something bad happened in TMB's computations.")
+			}
+			parm_table$est <- tmb_estimates
+			parm_table$se  <- tmb_stderrors
+		}
+
+		#- update parm_list:
+		parm_list <- include_free_parms( parm=parm_table$est, parm_list=parm_list, 
+			parm_table=parm_table )
 
 		#- deviance and aic
 		dev <- -2*ll

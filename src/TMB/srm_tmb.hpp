@@ -8,7 +8,6 @@ Type srm_tmb( objective_function<Type>* obj )
 {
 	
     using namespace density;
-    using namespace Eigen;
 	
     // data:
 	DATA_MATRIX(y);
@@ -19,7 +18,6 @@ Type srm_tmb( objective_function<Type>* obj )
     DATA_INTEGER(nd);
     DATA_IMATRIX(groupinfo);
     DATA_INTEGER(method); 
-    DATA_INTEGER(no_var);
   
     // information that we need later:
     int ncolX  = X.cols();
@@ -28,25 +26,30 @@ Type srm_tmb( objective_function<Type>* obj )
 	
     // parameters:
     PARAMETER_VECTOR(BETA);
-    PARAMETER_VECTOR(sdP);
-    PARAMETER_VECTOR(rhoP);
-    PARAMETER_VECTOR(sdD);
-    PARAMETER_VECTOR(rhoD);
+    PARAMETER_VECTOR(vecsdP);
+    PARAMETER_VECTOR(vecrhoP);
+    PARAMETER_VECTOR(vecsdD);
+    PARAMETER_VECTOR(vecrhoD);
   
     // make a covariance matrix for the persons:
-    matrix<Type> TAU_P = tsrmTMB::TAU( sdP, rhoP );
-  
+    matrix<Type> S_P = tsrmTMB::getS( vecsdP );
+    matrix<Type> R_P = tsrmTMB::getR2( vecrhoP );
+    matrix<Type> TAU_P = S_P*R_P*S_P;
+
     // make a covariance matrix for the dyads:
-    matrix<Type> TAU_D = tsrmTMB::uTAU_D( sdD, rhoD );
-   
+    vector<Type> sdD = vecsdD.exp();
+    matrix<Type> S_D = sdD(0) * matrix<Type>::Identity(2,2);
+    matrix<Type> R_D = tsrmTMB::getR2( vecrhoD );
+    matrix<Type> TAU_D = S_D*R_D*S_D;
+
     // compute big covariance matrices:
     matrix<Type> identp(np,np);
     identp.setIdentity();
-    matrix<Type> SIGMA_P = kronecker(TAU_P, identp);
+    matrix<Type> SIGMA_P = kronecker(identp,TAU_P);
     
     matrix<Type> identd(nd,nd);
     identd.setIdentity();
-    matrix<Type> SIGMA_D = kronecker(TAU_D, identd);
+    matrix<Type> SIGMA_D = kronecker(identd,TAU_D);
  
     // get group_infos:
     int ngroups = groupinfo.rows();
@@ -89,10 +92,18 @@ Type srm_tmb( objective_function<Type>* obj )
     
     if ( method != 0 ) nll += 0.5*atomic::logdet( reml_penterm );
 
-    // reporting:
+    // reporting - standard errors:
+    vector<Type> outsdP = S_P.diagonal();
+    vector<Type> outrhoP(1);
+    outrhoP(0) = R_P(0,1); 
+    vector<Type> outrhoD(1);
+    outrhoD(0) = R_D(0,1);
+    
     ADREPORT(BETA);
-    ADREPORT(TAU_P);
-    ADREPORT(TAU_D);
+    ADREPORT(outsdP);
+    ADREPORT(outrhoP);
+    ADREPORT(sdD);
+    ADREPORT(outrhoD);
 	
     return nll;
 }
